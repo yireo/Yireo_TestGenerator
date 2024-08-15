@@ -10,7 +10,7 @@ class ObjectManagerStub implements ObjectManagerInterface
 
     public function create($type, array $arguments = [])
     {
-        return new $type(...$arguments);
+        return new $type(...array_values($arguments));
     }
 
     public function get($type, array $arguments = [])

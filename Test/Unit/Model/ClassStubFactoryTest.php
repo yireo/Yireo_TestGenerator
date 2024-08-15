@@ -69,6 +69,7 @@ class ClassStubFactoryTest extends TestCase
     private function factory(): ClassStubFactory
     {
         $objectManager = new ObjectManagerStub();
+        // @phpstan-ignore-next-line
         return new ClassStubFactory($objectManager);
     }
 }
