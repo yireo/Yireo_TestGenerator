@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Test\Unit\Model;
 
+use Magento\Framework\ObjectManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
