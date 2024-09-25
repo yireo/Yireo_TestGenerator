@@ -35,22 +35,24 @@ class IntegrationTestGenerator
 
         $classNamePrefix = $this->getClassNamePrefix($moduleName);
 
-        $output->writeln('Generating module test');
         $testFile = $testPath.'ModuleTest.php';
-        $testContents = $this->moduleTestGenerator->generate($moduleName, $classNamePrefix);
         if (true === $overrideExisting || false === $this->getWriter()->isExist($testFile)) {
+            $testContents = $this->moduleTestGenerator->generate($moduleName, $classNamePrefix);
+            $output->writeln('Generating module test');
             $this->getWriter()->writeFile($testFile, $testContents);
         }
 
         $classNames = $this->classCollector->collect($modulePath);
         foreach ($classNames as $className) {
-            $output->writeln('Generating test for '.$className);
+
             $classStub = $this->classStubFactory->create($moduleName, $className);
             $testClassStub = $this->classStubFactory->createTest($classStub);
-            $testContents = $this->genericTestGenerator->generate($classStub, $testClassStub);
             $testFile = $modulePath.'/'.$testClassStub->getRelativePath();
-            $output->writeln('Writing file '.$testFile, OutputInterface::VERBOSITY_VERBOSE);
+
             if (true === $overrideExisting || false === $this->getWriter()->isExist($testFile)) {
+                $testContents = $this->genericTestGenerator->generate($classStub, $testClassStub);
+                $output->writeln('Generating test for '.$className);
+                $output->writeln('Writing file '.$testFile, OutputInterface::VERBOSITY_VERBOSE);
                 $this->getWriter()->writeFile($testFile, $testContents);
             }
         }
