@@ -6,9 +6,13 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Yireo\TestGenerator\Generator\IntegrationTest\AbstractTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\GenericTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\ModuleTestGenerator;
+use Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface;
+use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
 use Yireo\TestGenerator\Utilities\ClassCollector;
 
@@ -21,13 +25,17 @@ class IntegrationTestGenerator
         private DirectoryList $directoryList,
         private Filesystem $filesystem,
         private ClassCollector $classCollector,
-        private ClassStubFactory $classStubFactory
+        private ClassStubFactory $classStubFactory,
+        private array $testGenerators = [],
     ) {
     }
 
-    public function generate(string $moduleName, OutputInterface $output, bool $overrideExisting)
-    {
-        $modulePath = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, $moduleName);
+    public function generateAll(
+        string $moduleName,
+        OutputInterface $output,
+        bool $overrideExisting
+    ) {
+        $modulePath = $this->getModulePath($moduleName);
         $testPath = $modulePath.'/Test/Integration/';
         if (false === $this->getWriter()->isExist($testPath)) {
             $this->getWriter()->create($testPath);
@@ -37,25 +45,43 @@ class IntegrationTestGenerator
 
         $testFile = $testPath.'ModuleTest.php';
         if (true === $overrideExisting || false === $this->getWriter()->isExist($testFile)) {
-            $testContents = $this->moduleTestGenerator->generate($moduleName, $classNamePrefix);
+            $phpGenerator = $this->moduleTestGenerator->generate($moduleName, $classNamePrefix);
+            $testContents = $phpGenerator->output();
             $output->writeln('Generating module test');
             $this->getWriter()->writeFile($testFile, $testContents);
         }
 
         $classNames = $this->classCollector->collect($modulePath);
         foreach ($classNames as $className) {
-
-            $classStub = $this->classStubFactory->create($moduleName, $className);
-            $testClassStub = $this->classStubFactory->createTest($classStub);
-            $testFile = $modulePath.'/'.$testClassStub->getRelativePath();
-
-            if (true === $overrideExisting || false === $this->getWriter()->isExist($testFile)) {
-                $testContents = $this->genericTestGenerator->generate($classStub, $testClassStub);
-                $output->writeln('Generating test for '.$className);
-                $output->writeln('Writing file '.$testFile, OutputInterface::VERBOSITY_VERBOSE);
-                $this->getWriter()->writeFile($testFile, $testContents);
-            }
+            $this->generateTest($className, $modulePath, $output, $overrideExisting);
         }
+    }
+
+    public function generateTest(
+        string $moduleName,
+        string $className,
+        OutputInterface $output,
+        bool $overrideExisting
+    ): void {
+        $modulePath = $this->getModulePath($moduleName);
+
+        $classStub = $this->classStubFactory->create($moduleName, $className);
+        $testClassStub = $this->classStubFactory->createTest($classStub);
+        $testFile = $modulePath.'/'.$testClassStub->getRelativePath();
+
+        if (false === $overrideExisting && $this->getWriter()->isExist($testFile)) {
+            $output->writeln('Test for '.$className.' already exists');
+
+            return;
+        }
+
+        $testGenerator = $this->getTestGenerator($classStub);
+        $phpGenerator = $testGenerator->generate($classStub, $testClassStub);
+        $testContents = $phpGenerator->output();
+
+        $output->writeln('Generating test for '.$className);
+        $output->writeln('Writing file '.$testFile, OutputInterface::VERBOSITY_VERBOSE);
+        $this->getWriter()->writeFile($testFile, $testContents);
     }
 
     private function getClassNamePrefix(string $moduleName): string
@@ -68,5 +94,30 @@ class IntegrationTestGenerator
     private function getWriter(): WriteInterface
     {
         return $this->filesystem->getDirectoryWrite($this->directoryList::ROOT);
+    }
+
+    private function getModulePath(string $moduleName): string
+    {
+        $modulePath = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, $moduleName);
+        if (empty($modulePath)) {
+            throw new RuntimeException('No path found for module "'.$moduleName.'"');
+        }
+
+        return $modulePath;
+    }
+
+    private function getTestGenerator(ClassStub $classStub): TestGeneratorInterface
+    {
+        foreach ($this->testGenerators as $testGenerator) {
+            if (false === $testGenerator instanceof TestGeneratorInterface) {
+                continue;
+            }
+
+            if ($testGenerator->apply($classStub)) {
+                return $testGenerator;
+            }
+        }
+
+        return $this->genericTestGenerator;
     }
 }

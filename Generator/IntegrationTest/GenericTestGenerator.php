@@ -2,28 +2,23 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest;
 
-use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
+use Yireo\TestGenerator\Generator\PhpGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
-use Yireo\IntegrationTestHelper\Test\Integration\Traits\GetObjectManager;
 
-class GenericTestGenerator
+class GenericTestGenerator extends AbstractTestGenerator
 {
-    public function __construct(
-        private PhpGeneratorFactory $phpGeneratorFactory,
-    ) {
+    public function apply(ClassStub $classStub): bool
+    {
+        return true;
     }
 
-    public function generate(ClassStub $classStub, ClassStub $testClassStub): string
+    public function generate(ClassStub $classStub, ClassStub $testClassStub): PhpGenerator
     {
-        $testClassName = $testClassStub->getClassName();
-
-        $phpGenerator = $this->phpGeneratorFactory->create($testClassName, $testClassStub->getNamespace());
-        $phpGenerator->addTrait(GetObjectManager::class);
-        $phpGenerator->addUse($classStub->getFullQualifiedClassName());
+        $phpGenerator = parent::generate($classStub, $testClassStub);
 
         $phpGenerator->addClassMethod('testIfInstantiationWorks', $this->getTestIfInstantiationWorks($classStub->getClassName()));
 
-        return $phpGenerator->output();
+        return $phpGenerator;
     }
 
     private function getTestIfInstantiationWorks(string $className): string

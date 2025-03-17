@@ -6,6 +6,7 @@ use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsEnabled;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegistered;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegisteredForReal;
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
+use Yireo\TestGenerator\Generator\PhpGenerator;
 
 class ModuleTestGenerator
 {
@@ -14,7 +15,7 @@ class ModuleTestGenerator
     ) {
     }
 
-    public function generate(string $moduleName, string $classNamePrefix): string
+    public function generate(string $moduleName, string $classNamePrefix): PhpGenerator
     {
         $phpGenerator = $this->phpGeneratorFactory->create('ModuleTest', $classNamePrefix);
         $phpGenerator->addTrait(AssertModuleIsEnabled::class);
@@ -22,7 +23,7 @@ class ModuleTestGenerator
         $phpGenerator->addTrait(AssertModuleIsRegisteredForReal::class);
         $phpGenerator->addClassMethod('testModule', $this->getMethodModuleTest($moduleName));
 
-        return $phpGenerator->output();
+        return $phpGenerator;
     }
 
     private function getMethodModuleTest(string $moduleName): string

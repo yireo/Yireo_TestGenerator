@@ -30,6 +30,7 @@ class GenerateCommand extends Command
         $this->setName('yireo:test:generate')
             ->setDescription('Generate tests for a given module')
             ->addArgument('moduleName', InputArgument::REQUIRED, 'Module name')
+            ->addArgument('className', InputArgument::OPTIONAL, 'Class name')
             ->addOption('override-existing', null, InputOption::VALUE_OPTIONAL, 'Override existing tests', false)
             ->addOption('type', null, InputOption::VALUE_OPTIONAL, 'Type of tests (unit, integration)', 'integration')
         ;
@@ -62,12 +63,26 @@ class GenerateCommand extends Command
             return Command::INVALID;
         }
 
+        $className = (string)$input->getArgument('className');
+
+        if ($type === 'integration' && !empty($className)) {
+            $this->integrationTestGenerator->generateTest($moduleName, $className, $output, $overrideExisting);
+            return Command::SUCCESS;
+        }
+
         if ($type === 'integration') {
-            $this->integrationTestGenerator->generate($moduleName, $output, $overrideExisting);
+            $this->integrationTestGenerator->generateAll($moduleName, $output, $overrideExisting);
+            return Command::SUCCESS;
+        }
+
+        if ($type === 'unit' && !empty($className)) {
+            $this->unitTestGenerator->generateTest($moduleName, $className, $output, $overrideExisting);
+            return Command::SUCCESS;
         }
 
         if ($type === 'unit') {
-            $this->unitTestGenerator->generate($moduleName, $output, $overrideExisting);
+            $this->unitTestGenerator->generateAll($moduleName, $output, $overrideExisting);
+            return Command::SUCCESS;
         }
 
         return Command::SUCCESS;

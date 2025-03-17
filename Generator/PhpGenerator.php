@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Generator;
 
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
@@ -18,9 +19,11 @@ class PhpGenerator
     ) {
     }
 
-    public function addClassMethod(string $methodName, string $methodBody)
-    {
-        $this->classType->addMethod($methodName)
+    public function addClassMethod(
+        string $methodName,
+        string $methodBody,
+    ): Method {
+        return $this->classType->addMethod($methodName)
             ->setFinal()
             ->setPublic()
             ->setBody($methodBody);
@@ -32,9 +35,9 @@ class PhpGenerator
         $this->addUse($traitName);
     }
 
-    public function addUse(string $namespace)
+    public function addUse(string $namespace, ?string $alias = null)
     {
-        $this->namespace->addUse($namespace);
+        $this->namespace->addUse($namespace, $alias);
     }
 
     public function generate(string $file):bool

@@ -2,6 +2,9 @@
 
 namespace Yireo\TestGenerator\Model;
 
+use ReflectionClass;
+use ReflectionMethod;
+
 class ClassStub
 {
     public function __construct(
@@ -46,5 +49,15 @@ class ClassStub
     {
         $path = $this->getRelativeNamespace() . '/' . $this->getClassName().'.php';
         return str_replace('\\','/', $path);
+    }
+
+    /**
+     * @return ReflectionMethod[]
+     * @throws \ReflectionException
+     */
+    public function getClassMethods(): array
+    {
+        $reflectionClass = new ReflectionClass($this->getFullQualifiedClassName());
+        return $reflectionClass->getMethods();
     }
 }
