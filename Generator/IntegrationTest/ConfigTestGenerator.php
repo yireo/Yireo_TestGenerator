@@ -17,6 +17,7 @@ class ConfigTestGenerator extends AbstractTestGenerator
     public function generate(ClassStub $classStub, ClassStub $testClassStub): PhpGenerator
     {
         $phpGenerator = parent::generate($classStub, $testClassStub);
+        // @phpstan-ignore-next-line
         $phpGenerator->addUse(ConfigFixture::class, 'ConfigFixture');
 
         foreach ($classStub->getClassMethods() as $classMethod) {
@@ -31,6 +32,7 @@ class ConfigTestGenerator extends AbstractTestGenerator
             $phpGenerator->addClassMethod(
                 'test'.ucfirst($classMethod->getName()),
                 $this->getTestConfigMethod($classStub, $classMethod)
+            // @phpstan-ignore-next-line
             )->addAttribute(ConfigFixture::class, [
                 'path' => $path,
                 'value' => 'foobar',
