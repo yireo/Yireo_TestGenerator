@@ -5,6 +5,7 @@ namespace Yireo\TestGenerator\Generator\IntegrationTest;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsEnabled;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegistered;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegisteredForReal;
+use Yireo\TestGenerator\Generator\Context;
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
 use Yireo\TestGenerator\Generator\PhpGenerator;
 
@@ -15,8 +16,11 @@ class ModuleTestGenerator
     ) {
     }
 
-    public function generate(string $moduleName, string $classNamePrefix): PhpGenerator
+    public function generate(Context $context): PhpGenerator
     {
+        $moduleName = $context->getModuleName();
+        $classNamePrefix = $context->getClassNamePrefix();
+
         $phpGenerator = $this->phpGeneratorFactory->create('ModuleTest', $classNamePrefix);
         $phpGenerator->addTrait(AssertModuleIsEnabled::class);
         $phpGenerator->addTrait(AssertModuleIsRegistered::class);

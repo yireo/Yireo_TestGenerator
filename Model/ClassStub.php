@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Model;
 
+use Magento\Framework\App\ObjectManager;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -59,5 +60,10 @@ class ClassStub
     {
         $reflectionClass = new ReflectionClass($this->getFullQualifiedClassName());
         return $reflectionClass->getMethods();
+    }
+
+    public function getInstance()
+    {
+        return ObjectManager::getInstance()->get($this->getFullQualifiedClassName());
     }
 }

@@ -40,6 +40,11 @@ class PhpGenerator
         $this->namespace->addUse($namespace, $alias);
     }
 
+    public function addConstant(string $name, string $value)
+    {
+        $this->classType->addConstant($name, $value);
+    }
+
     public function generate(string $file):bool
     {
         $this->writer->writeFile($file, $this->output());

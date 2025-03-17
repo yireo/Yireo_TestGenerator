@@ -8,7 +8,6 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yireo\TestGenerator\Generator\IntegrationTest\AbstractTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\GenericTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\ModuleTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface;
@@ -35,25 +34,23 @@ class IntegrationTestGenerator
         OutputInterface $output,
         bool $overrideExisting
     ) {
-        $modulePath = $this->getModulePath($moduleName);
-        $testPath = $modulePath.'/Test/Integration/';
+        $context = $this->getContext($moduleName);
+
+        $testPath = $context->getModulePath().'/Test/Integration/';
         if (false === $this->getWriter()->isExist($testPath)) {
             $this->getWriter()->create($testPath);
         }
 
-        $classNamePrefix = $this->getClassNamePrefix($moduleName);
-
         $testFile = $testPath.'ModuleTest.php';
         if (true === $overrideExisting || false === $this->getWriter()->isExist($testFile)) {
-            $phpGenerator = $this->moduleTestGenerator->generate($moduleName, $classNamePrefix);
-            $testContents = $phpGenerator->output();
+            $phpGenerator = $this->moduleTestGenerator->generate($context);
             $output->writeln('Generating module test');
-            $this->getWriter()->writeFile($testFile, $testContents);
+            $this->getWriter()->writeFile($testFile, $phpGenerator->output());
         }
 
-        $classNames = $this->classCollector->collect($modulePath);
+        $classNames = $this->classCollector->collect($context->getModulePath());
         foreach ($classNames as $className) {
-            $this->generateTest($className, $modulePath, $output, $overrideExisting);
+            $this->generateTest($moduleName, $className, $output, $overrideExisting);
         }
     }
 
@@ -63,11 +60,11 @@ class IntegrationTestGenerator
         OutputInterface $output,
         bool $overrideExisting
     ): void {
-        $modulePath = $this->getModulePath($moduleName);
+        $context = $this->getContext($moduleName);
 
-        $classStub = $this->classStubFactory->create($moduleName, $className);
+        $classStub = $this->classStubFactory->create($context->getModuleName(), $className);
         $testClassStub = $this->classStubFactory->createTest($classStub);
-        $testFile = $modulePath.'/'.$testClassStub->getRelativePath();
+        $testFile = $context->getModulePath().'/'.$testClassStub->getRelativePath();
 
         if (false === $overrideExisting && $this->getWriter()->isExist($testFile)) {
             $output->writeln('Test for '.$className.' already exists');
@@ -75,7 +72,9 @@ class IntegrationTestGenerator
             return;
         }
 
-        $testGenerator = $this->getTestGenerator($classStub);
+        $testGenerator = $this->getTestGenerator($classStub, $output);
+        $output->writeln('Test generator: '.get_class($testGenerator));
+
         $phpGenerator = $testGenerator->generate($classStub, $testClassStub);
         $testContents = $phpGenerator->output();
 
@@ -106,9 +105,10 @@ class IntegrationTestGenerator
         return $modulePath;
     }
 
-    private function getTestGenerator(ClassStub $classStub): TestGeneratorInterface
+    private function getTestGenerator(ClassStub $classStub, OutputInterface $output): TestGeneratorInterface
     {
-        foreach ($this->testGenerators as $testGenerator) {
+        foreach ($this->testGenerators as $testGeneratorName => $testGenerator) {
+            $output->writeln('Checking "'.$testGeneratorName.'" generator: '.get_class($testGenerator));
             if (false === $testGenerator instanceof TestGeneratorInterface) {
                 continue;
             }
@@ -119,5 +119,12 @@ class IntegrationTestGenerator
         }
 
         return $this->genericTestGenerator;
+    }
+
+    private function getContext(string $moduleName): Context
+    {
+        $modulePath = $this->getModulePath($moduleName);
+        $classNamePrefix = $this->getClassNamePrefix($moduleName);
+        return new Context($moduleName, $modulePath, $classNamePrefix);
     }
 }
