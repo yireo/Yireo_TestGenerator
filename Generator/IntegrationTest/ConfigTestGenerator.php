@@ -34,8 +34,8 @@ class ConfigTestGenerator extends AbstractTestGenerator
                 $this->getTestConfigMethod($classStub, $classMethod)
             // @phpstan-ignore-next-line
             )->addAttribute(ConfigFixture::class, [
-                'path' => $path,
-                'value' => 'foobar',
+                $path,
+                'todo',
             ]);
         }
 
@@ -49,7 +49,7 @@ class ConfigTestGenerator extends AbstractTestGenerator
 
         return <<<EOF
 \$config = \$this->om()->get({$className}::class);
-\$this->assertSame('foobar', \$config->{$methodName}());
+\$this->assertSame('todo', \$config->{$methodName}());
 // @todo: Insert the correct configuration test
 EOF;
     }
