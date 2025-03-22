@@ -63,6 +63,8 @@ Given the following PHP class `{$className}` with the following contents:
 
 Generate a new test class `{$testClassName}` implementing PHPUnit 9. Make sure to add a test method per original method. Add PHP 8 type hints (return types, argument types). Add a `declare(strict_types=1)` statement in the top. When an original method contains arguments, test out various variants of these arguments.
 
+Do not use `setUp` method in the test class. Instead, create all test dependencies in each test method.
+
 Do not give a confirmation text. Do not add an explanation. Just return the PHP text.
 EOF;
     }
