@@ -2,43 +2,34 @@
 
 namespace Yireo\TestGenerator\Generator\UnitTest;
 
-use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Model\AbstractModel;
-use Magento\Framework\Model\ResourceModel\Db\AbstractDb as AbstractDbCollection;
 use Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection;
 use ReflectionClass;
 use Yireo\TestGenerator\Generator\PhpGenerator;
-use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
 use Yireo\TestGenerator\Model\ClassStub;
 
-class GenericTestGenerator
+class GenericTestGenerator extends AbstractTestGenerator
 {
-    private ?PhpGenerator $phpGenerator = null;
-
-    public function __construct(
-        private PhpGeneratorFactory $phpGeneratorFactory,
-    ) {
+    public function apply(ClassStub $classStub): bool
+    {
+        return true;
     }
 
-    public function generate(ClassStub $classStub, ClassStub $testClassStub): string
+    public function generate(ClassStub $classStub, ClassStub $testClassStub): string|PhpGenerator
     {
-        $testClassName = $testClassStub->getClassName();
+        $phpGenerator = parent::generate($classStub, $testClassStub);
 
-        $this->phpGenerator = $this->phpGeneratorFactory->create($testClassName, $testClassStub->getNamespace());
-        $this->phpGenerator->addUse($classStub->getFullQualifiedClassName());
-
-        $this->phpGenerator->addClassMethod(
+        $phpGenerator->addClassMethod(
             'testMocking',
             $this->getTestMocking($classStub)
         );
 
-        $this->phpGenerator->addClassMethod(
+        $phpGenerator->addClassMethod(
             'testInstantiationWithMocks',
-            $this->getTestInstantiationWithMocks($classStub)
+            $this->getTestInstantiationWithMocks($phpGenerator, $classStub)
         );
 
-        return $this->phpGenerator->output();
+        return $phpGenerator;
     }
 
     private function getTestMocking(ClassStub $classStub): string
@@ -54,7 +45,7 @@ class GenericTestGenerator
 EOF;
     }
 
-    private function getTestInstantiationWithMocks(ClassStub $classStub): string
+    private function getTestInstantiationWithMocks(PhpGenerator $phpGenerator, ClassStub $classStub): string
     {
         if ($this->skipInstantationWithMocks($classStub->getFullQualifiedClassName())) {
             return "\$this->markTestSkipped('Test skipped because constructor is too complex for mocking');";
@@ -89,7 +80,7 @@ EOF;
                     $test .= "\$$parameterName = \$this->createMock({$parameterClassName}::class);\n";
                     $test .= "//\${$parameterName}->method('getFoo')->willReturn('bar');\n";
                     $test .= "\n";
-                    $this->phpGenerator->addUse($parameterClass);
+                    $phpGenerator->addUse($parameterClass);
                 }
 
                 $constructorArguments[] = '$'.$parameterName;

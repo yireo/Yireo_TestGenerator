@@ -8,7 +8,9 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Yireo\TestGenerator\Generator\UnitTest\TestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\GenericTestGenerator;
+use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
 use Yireo\TestGenerator\Utilities\ClassCollector;
 
@@ -20,7 +22,8 @@ class UnitTestGenerator
         private DirectoryList $directoryList,
         private Filesystem $filesystem,
         private ClassCollector $classCollector,
-        private ClassStubFactory $classStubFactory
+        private ClassStubFactory $classStubFactory,
+        private array $testGenerators = [],
     ) {
     }
 
@@ -52,7 +55,13 @@ class UnitTestGenerator
         $modulePath = $this->getModulePath($moduleName);
         $classStub = $this->classStubFactory->create($moduleName, $className);
         $testClassStub = $this->classStubFactory->createTest($classStub, 'Unit');
-        $testContents = $this->genericTestGenerator->generate($classStub, $testClassStub);
+
+        $testGenerator = $this->getTestGenerator($classStub, $output);
+        $testContents = $testGenerator->generate($classStub, $testClassStub);
+        if ($testContents instanceof PhpGenerator) {
+            $testContents = $testContents->output();
+        }
+
         $testFile = $modulePath.'/'.$testClassStub->getRelativePath();
 
         if (false === $overrideExisting && $this->getWriter()->isExist($testFile)) {
@@ -64,13 +73,6 @@ class UnitTestGenerator
         $output->writeln('Writing file '.$testFile, OutputInterface::VERBOSITY_VERBOSE);
 
         $this->getWriter()->writeFile($testFile, $testContents);
-    }
-
-    private function getClassNamePrefix(string $moduleName): string
-    {
-        $moduleNameParts = explode('_', $moduleName);
-
-        return $moduleNameParts[0].'\\'.$moduleNameParts[1].'\\Test\\Unit';
     }
 
     private function getWriter(): WriteInterface
@@ -86,5 +88,21 @@ class UnitTestGenerator
         }
 
         return $modulePath;
+    }
+
+    private function getTestGenerator(ClassStub $classStub, OutputInterface $output): TestGeneratorInterface
+    {
+        foreach ($this->testGenerators as $testGeneratorName => $testGenerator) {
+            $output->writeln('Checking "'.$testGeneratorName.'" generator: '.get_class($testGenerator));
+            if (false === $testGenerator instanceof TestGeneratorInterface) {
+                continue;
+            }
+
+            if ($testGenerator->apply($classStub)) {
+                return $testGenerator;
+            }
+        }
+
+        return $this->genericTestGenerator;
     }
 }

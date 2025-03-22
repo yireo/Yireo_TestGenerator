@@ -16,7 +16,10 @@ class GenericTestGenerator extends AbstractTestGenerator
     {
         $phpGenerator = parent::generate($classStub, $testClassStub);
 
-        $phpGenerator->addClassMethod('testIfInstantiationWorks', $this->getTestIfInstantiationWorks($classStub->getClassName()));
+        $phpGenerator->addClassMethod(
+            'testIfInstantiationWorks',
+            $this->getTestIfInstantiationWorks($classStub->getClassName())
+        );
 
         return $phpGenerator;
     }

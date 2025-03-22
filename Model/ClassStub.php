@@ -3,12 +3,14 @@
 namespace Yireo\TestGenerator\Model;
 
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Component\ComponentRegistrar;
 use ReflectionClass;
 use ReflectionMethod;
 
 class ClassStub
 {
     public function __construct(
+        private ComponentRegistrar $componentRegistrar,
         private string $moduleName,
         private string $fullQualifiedClassName
     ) {
@@ -48,8 +50,16 @@ class ClassStub
 
     public function getRelativePath(): string
     {
-        $path = $this->getRelativeNamespace() . '/' . $this->getClassName().'.php';
-        return str_replace('\\','/', $path);
+        $path = $this->getRelativeNamespace().'/'.$this->getClassName().'.php';
+
+        return str_replace('\\', '/', $path);
+    }
+
+    public function getAbsolutePath(): string
+    {
+        $path = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, $this->getModuleName());
+
+        return $path.'/'.$this->getRelativePath();
     }
 
     /**
@@ -59,6 +69,7 @@ class ClassStub
     public function getClassMethods(): array
     {
         $reflectionClass = new ReflectionClass($this->getFullQualifiedClassName());
+
         return $reflectionClass->getMethods();
     }
 
