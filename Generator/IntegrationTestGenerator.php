@@ -8,10 +8,7 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yireo\TestGenerator\Generator\IntegrationTest\GenericTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\ModuleTestGenerator;
-use Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface;
-use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
 use Yireo\TestGenerator\Utilities\ClassCollector;
 
@@ -20,12 +17,11 @@ class IntegrationTestGenerator
     public function __construct(
         private ComponentRegistrar $componentRegistrar,
         private ModuleTestGenerator $moduleTestGenerator,
-        private GenericTestGenerator $genericTestGenerator,
         private DirectoryList $directoryList,
         private Filesystem $filesystem,
         private ClassCollector $classCollector,
         private ClassStubFactory $classStubFactory,
-        private array $testGenerators = [],
+        private IntegrationTestGeneratorListing $generatorListing
     ) {
     }
 
@@ -72,7 +68,7 @@ class IntegrationTestGenerator
             return;
         }
 
-        $testGenerator = $this->getTestGenerator($classStub, $output);
+        $testGenerator = $this->generatorListing->selectGenerator($classStub);
         $output->writeln('Test generator: '.get_class($testGenerator));
 
         $phpGenerator = $testGenerator->generate($classStub, $testClassStub);
@@ -103,22 +99,6 @@ class IntegrationTestGenerator
         }
 
         return $modulePath;
-    }
-
-    private function getTestGenerator(ClassStub $classStub, OutputInterface $output): TestGeneratorInterface
-    {
-        foreach ($this->testGenerators as $testGeneratorName => $testGenerator) {
-            $output->writeln('Checking "'.$testGeneratorName.'" generator: '.get_class($testGenerator));
-            if (false === $testGenerator instanceof TestGeneratorInterface) {
-                continue;
-            }
-
-            if ($testGenerator->apply($classStub)) {
-                return $testGenerator;
-            }
-        }
-
-        return $this->genericTestGenerator;
     }
 
     private function getContext(string $moduleName): Context

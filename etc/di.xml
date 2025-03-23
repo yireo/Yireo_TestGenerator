@@ -9,19 +9,28 @@
         </arguments>
     </type>
 
-    <type name="Yireo\TestGenerator\Generator\UnitTestGenerator">
+    <type name="Yireo\TestGenerator\Generator\UnitTestGeneratorListing">
         <arguments>
             <argument name="testGenerators" xsi:type="array">
-                <item name="openai" xsi:type="object">Yireo\TestGenerator\Generator\UnitTest\OpenAiTestGenerator</item>
-                <item name="anthropic" xsi:type="object">Yireo\TestGenerator\Generator\UnitTest\AnthropicAiTestGenerator</item>
+                <item name="openai" xsi:type="array">
+                    <item name="class_name" xsi:type="string">Yireo\TestGenerator\Generator\UnitTest\OpenAiTestGenerator</item>
+                    <item name="sort_order" xsi:type="number">100</item>
+                </item>
+                <item name="anthropic" xsi:type="array">
+                    <item name="class_name" xsi:type="string">Yireo\TestGenerator\Generator\UnitTest\AnthropicAiTestGenerator</item>
+                    <item name="sort_order" xsi:type="number">100</item>
+                </item>
             </argument>
         </arguments>
     </type>
 
-    <type name="Yireo\TestGenerator\Generator\IntegrationTestGenerator">
+    <type name="Yireo\TestGenerator\Generator\IntegrationTestGeneratorListing">
         <arguments>
             <argument name="testGenerators" xsi:type="array">
-                <item name="config" xsi:type="object">Yireo\TestGenerator\Generator\IntegrationTest\ConfigTestGenerator</item>
+                <item name="config" xsi:type="array">
+                    <item name="class_name" xsi:type="string">Yireo\TestGenerator\Generator\IntegrationTest\ConfigTestGenerator</item>
+                    <item name="sort_order" xsi:type="number">0</item>
+                </item>
             </argument>
         </arguments>
     </type>
