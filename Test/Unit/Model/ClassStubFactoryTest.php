@@ -2,7 +2,7 @@
 
 namespace Yireo\TestGenerator\Test\Unit\Model;
 
-use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Component\ComponentRegistrar;
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
@@ -69,6 +69,8 @@ class ClassStubFactoryTest extends TestCase
     private function factory(): ClassStubFactory
     {
         $objectManager = new ObjectManagerStub();
+        $objectManager->set(ComponentRegistrar::class, $this->createMock(ComponentRegistrar::class));
+
         // @phpstan-ignore-next-line
         return new ClassStubFactory($objectManager);
     }

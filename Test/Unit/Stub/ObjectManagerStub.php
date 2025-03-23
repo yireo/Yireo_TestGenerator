@@ -10,7 +10,21 @@ class ObjectManagerStub implements ObjectManagerInterface
 
     public function create($type, array $arguments = [])
     {
-        return new $type(...array_values($arguments));
+        $newArguments = [];
+
+        $reflectionType = new \ReflectionClass($type);
+        foreach ($reflectionType->getConstructor()->getParameters() as $parameter) {
+            $parameterName  = $parameter->getName();
+            if (isset($arguments[$parameterName])) {
+                $newArguments[] = $arguments[$parameterName];
+                continue;
+            }
+
+            $newArguments[] = $this->objects[$parameter->getDeclaringClass()->getName()];
+        }
+
+
+        return new $type(...array_values($newArguments));
     }
 
     public function get($type, array $arguments = [])
@@ -20,6 +34,11 @@ class ObjectManagerStub implements ObjectManagerInterface
         }
 
         return $this->objects[$type];
+    }
+
+    public function set($type, $object)
+    {
+        $this->objects[$type] = $object;
     }
 
     public function configure(array $configuration)
