@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4] - 23 March 2025
+- Add generators for OpenAI and ClaudeAI
+
 ## [0.0.3] - 17 March 2025
 - Allow for other generators to be created
 
