@@ -3,6 +3,9 @@
 namespace Yireo\TestGenerator\Test\Unit\Stub;
 
 use Magento\Framework\ObjectManagerInterface;
+use ReflectionClass;
+use ReflectionNamedType;
+use RuntimeException;
 
 class ObjectManagerStub implements ObjectManagerInterface
 {
@@ -12,7 +15,7 @@ class ObjectManagerStub implements ObjectManagerInterface
     {
         $newArguments = [];
 
-        $reflectionType = new \ReflectionClass($type);
+        $reflectionType = new ReflectionClass($type);
         foreach ($reflectionType->getConstructor()->getParameters() as $parameter) {
             $parameterName  = $parameter->getName();
             if (isset($arguments[$parameterName])) {
@@ -20,9 +23,15 @@ class ObjectManagerStub implements ObjectManagerInterface
                 continue;
             }
 
-            $newArguments[] = $this->objects[$parameter->getDeclaringClass()->getName()];
-        }
+            $parameterClass = $parameter->getType();
+            if ($parameterClass instanceof ReflectionNamedType
+                && array_key_exists($parameterClass->getName(), $this->objects)) {
+                $newArguments[] = $this->objects[$parameterClass->getName()];
+                continue;
+            }
 
+            throw new RuntimeException("Class {$type} has unknown parameter {$parameterName}");
+        }
 
         return new $type(...array_values($newArguments));
     }
