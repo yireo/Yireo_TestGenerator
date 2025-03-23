@@ -2,12 +2,12 @@
 
 namespace Yireo\TestGenerator\Generator\UnitTest;
 
-use OpenAI;
+use Anthropic;
 use Yireo\TestGenerator\Config\Config;
 use Yireo\TestGenerator\Generator\PhpGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
 
-class OpenAiTestGenerator implements TestGeneratorInterface
+class AnthropicAiTestGenerator implements TestGeneratorInterface
 {
     public function __construct(
         private Config $config,
@@ -16,19 +16,20 @@ class OpenAiTestGenerator implements TestGeneratorInterface
 
     public function apply(ClassStub $classStub): bool
     {
-        if (false === $this->config->isOpenAiEnabled()) {
+        if (false === $this->config->isAnthropicEnabled()) {
             return false;
         }
 
-        $openAiApiKey = $this->config->getOpenAiApiKey();
+        $anthropicAiApiKey = $this->config->getAnthropicApiKey();
 
-        return !empty($openAiApiKey);
+        return !empty($anthropicAiApiKey);
     }
 
     public function generate(ClassStub $classStub, ClassStub $testClassStub): string|PhpGenerator
     {
-        $openAiApiKey = $this->config->getOpenAiApiKey();
-        $client = OpenAI::client($openAiApiKey);
+        $anthropicAiApiKey = $this->config->getAnthropicApiKey();
+        $client = Anthropic::client($anthropicAiApiKey);
+
 
         $classPath = $classStub->getAbsolutePath();
         $classContents = file_get_contents($classPath); // @todo: Move this to ClassStub
@@ -39,17 +40,19 @@ class OpenAiTestGenerator implements TestGeneratorInterface
             $classContents,
         );
 
-        $result = $client->chat()->create([
-            'model' => 'gpt-4o',
+        $result = $client->messages()->create([
+            'model' => 'claude-3-7-sonnet-20250219', // @todo: Determine this automatically
+            'max_tokens' => 8192,
             'messages' => [
                 [
                     'role' => 'user',
-                    'content' => $prompt
+                    'content' => $prompt,
                 ],
             ],
         ]);
 
-        $contents = $result->choices[0]->message->content;
+        $contents = $result->content[0]->text;
+
         $contents = str_replace('```php', '', $contents);
         $contents = str_replace('```', '', $contents);
 

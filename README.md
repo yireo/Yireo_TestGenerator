@@ -24,6 +24,23 @@ Or generate unit tests:
 bin/magento yireo:test:generate Yireo_Example --type=unit
 ```
 
+Generate unit tests, overriding the original test, for a specific class only:
+````bash
+bin/magento yireo:test:generate --override-existing 1 --type unit -- 'Yireo_LokiCheckoutAccountType' '\Yireo\LokiCheckoutAccountType\Config\Source\AccountTypeOptions'
+````
+
+### AI generated tests
+This module also offers to generate unit tests or integration tests by using AI. The tests generated might not always be perfect and might not even work. To the least, they offer you a kickstart instead of needing to code things yourself.
+
+The following coding AIs are currently supported:
+
+- OpenAI (ChatGPT)
+- Anthropic (Claude AI)
+
+Both require an API key to be used. Note that these AI platforms will bill you according to your usage. 
+
+In the Store Configuration under **Yireo > Test Generator** you can enable each AI and configure an API key.
+
 ### Extending test types
 The Integration Tests can be created by using a custom generator. For instance, there is a `ConfigTestGenerator` which allows for a
 specific config test case to be created, as long as the PHP class name matches with `*\Config\Config`.
@@ -43,3 +60,7 @@ specific config test case to be created, as long as the PHP class name matches w
 
 This generator class needs to implement `\Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface`. See the
 `\Yireo\TestGenerator\Generator\IntegrationTest\ConfigTestGenerator` for a full example.
+
+## Todo
+- Move the AI mechanisms in separate modules
+- Allow to configure the AI prompt yourself

@@ -13,6 +13,7 @@
         <arguments>
             <argument name="testGenerators" xsi:type="array">
                 <item name="openai" xsi:type="object">Yireo\TestGenerator\Generator\UnitTest\OpenAiTestGenerator</item>
+                <item name="anthropic" xsi:type="object">Yireo\TestGenerator\Generator\UnitTest\AnthropicAiTestGenerator</item>
             </argument>
         </arguments>
     </type>

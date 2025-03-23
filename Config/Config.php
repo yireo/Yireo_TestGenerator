@@ -21,4 +21,14 @@ class Config
     {
         return (string)$this->scopeConfig->getValue('yireo_test_generator/general/openai_api_key');
     }
+
+    public function isAnthropicEnabled(): bool
+    {
+        return (bool)$this->scopeConfig->getValue('yireo_test_generator/general/anthropic_enabled');
+    }
+
+    public function getAnthropicApiKey(): string
+    {
+        return (string)$this->scopeConfig->getValue('yireo_test_generator/general/anthropic_api_key');
+    }
 }
