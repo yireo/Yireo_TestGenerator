@@ -3,6 +3,7 @@
     <default>
         <yireo_test_generator>
             <general>
+                <openai_enabled>0</openai_enabled>
                 <openai_api_key/>
             </general>
         </yireo_test_generator>

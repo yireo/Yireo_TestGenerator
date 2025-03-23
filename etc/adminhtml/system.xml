@@ -10,6 +10,16 @@
             <resource>Yireo_TestGenerator::config</resource>
             <group id="general" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General Settings</label>
+                <field id="openai_enabled"
+                       translate="label"
+                       type="select"
+                       sortOrder="1"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable OpenAI API</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="openai_api_key"
                        translate="label"
                        type="text"
@@ -18,6 +28,9 @@
                        showInWebsite="1"
                        showInStore="1">
                     <label>OpenAI API key</label>
+                    <depends>
+                        <field id="openai_enabled">1</field>
+                    </depends>
                 </field>
             </group>
         </section>

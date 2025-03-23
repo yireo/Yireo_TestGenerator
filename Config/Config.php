@@ -12,6 +12,11 @@ class Config
     ) {
     }
 
+    public function isOpenAiEnabled(): bool
+    {
+        return (bool)$this->scopeConfig->getValue('yireo_test_generator/general/openai_enabled');
+    }
+
     public function getOpenAiApiKey(): string
     {
         return (string)$this->scopeConfig->getValue('yireo_test_generator/general/openai_api_key');
