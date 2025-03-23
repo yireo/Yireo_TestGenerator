@@ -43,7 +43,7 @@ class IntegrationTestGeneratorListing
 
         $result = [];
         foreach ($generators as $generator) {
-            $result[] = $this->objectManager->get($generator);
+            $result[] = $this->objectManager->get($generator['class_name']);
         }
 
         return $result;
