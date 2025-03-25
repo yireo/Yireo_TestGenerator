@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Yireo\TestGenerator\Generator\IntegrationTest;
+namespace Yireo\TestGenerator\Generator\IntegrationTest\SourceTest;
 
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
-use Yireo\TestGenerator\Generator\PhpGenerator;
+use Yireo\TestGenerator\Generator\PhpGeneratorInterface;
 use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\GetObjectManager;
 
-abstract class AbstractTestGenerator implements TestGeneratorInterface
+abstract class AbstractTestGenerator implements SourceTestGeneratorInterface
 {
     public function __construct(
         protected PhpGeneratorFactory $phpGeneratorFactory,
@@ -16,7 +16,7 @@ abstract class AbstractTestGenerator implements TestGeneratorInterface
 
     abstract public function apply(ClassStub $classStub): bool;
 
-    public function generate(ClassStub $classStub, ClassStub $testClassStub): PhpGenerator
+    public function generate(ClassStub $classStub, ClassStub $testClassStub): PhpGeneratorInterface
     {
         $phpGenerator = $this->getPhpGenerator($testClassStub);
         $phpGenerator->addTrait(GetObjectManager::class);
@@ -25,8 +25,8 @@ abstract class AbstractTestGenerator implements TestGeneratorInterface
         return $phpGenerator;
     }
 
-    protected function getPhpGenerator(ClassStub $testClassStub): PhpGenerator
+    protected function getPhpGenerator(ClassStub $testClassStub): PhpGeneratorInterface
     {
-        return $this->phpGeneratorFactory->create($testClassStub->getClassName(), $testClassStub->getNamespace());
+        return $this->phpGeneratorFactory->create($testClassStub);
     }
 }

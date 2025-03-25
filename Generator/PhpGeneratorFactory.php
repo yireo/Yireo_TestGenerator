@@ -8,6 +8,7 @@ use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use PHPUnit\Framework\TestCase;
+use Yireo\TestGenerator\Model\ClassStub;
 
 class PhpGeneratorFactory
 {
@@ -17,8 +18,11 @@ class PhpGeneratorFactory
     ) {
     }
 
-    public function create(string $className, string $classNamespace): PHPGenerator
+    public function create(ClassStub $classStub): PhpGeneratorInterface
     {
+        $className = $classStub->getClassName();
+        $classNamespace = $classStub->getNamespace();
+
         $classType = new ClassType($className);
         $classType->setFinal();
         $classType->setExtends(TestCase::class);
@@ -31,6 +35,7 @@ class PhpGeneratorFactory
         $fileType->setStrictTypes();
 
         $writer = $this->filesystem->getDirectoryWrite($this->directoryList::ROOT);
+        
         return new PhpGenerator($classType, $namespaceType, $fileType, $writer);
     }
 }

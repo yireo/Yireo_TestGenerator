@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Yireo\TestGenerator\Generator\IntegrationTest;
+namespace Yireo\TestGenerator\Generator\IntegrationTest\SourceTest;
 
 use Magento\TestFramework\Fixture\Config as ConfigFixture;
 use ReflectionMethod;
@@ -17,7 +17,6 @@ class ConfigTestGenerator extends AbstractTestGenerator
     public function generate(ClassStub $classStub, ClassStub $testClassStub): PhpGenerator
     {
         $phpGenerator = parent::generate($classStub, $testClassStub);
-        // @phpstan-ignore-next-line
         $phpGenerator->addUse(ConfigFixture::class, 'ConfigFixture');
 
         foreach ($classStub->getClassMethods() as $classMethod) {
@@ -29,14 +28,15 @@ class ConfigTestGenerator extends AbstractTestGenerator
             $methodName = preg_replace('/^get/', '', $methodName);
             $path = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $methodName));
 
-            $phpGenerator->addClassMethod(
-                'test'.ucfirst($classMethod->getName()),
-                $this->getTestConfigMethod($classStub, $classMethod)
-            // @phpstan-ignore-next-line
-            )->addAttribute(ConfigFixture::class, [
-                $path,
-                'todo',
-            ]);
+            $phpGenerator->getClassType()->addMethod('test'.ucfirst($classMethod->getName()))
+                ->setFinal()
+                ->setReturnType('void')
+                ->setPublic()
+                ->setBody($this->getTestConfigMethod($classStub, $classMethod))
+                ->addAttribute(ConfigFixture::class, [
+                    $path,
+                    'todo',
+                ]);
         }
 
         return $phpGenerator;

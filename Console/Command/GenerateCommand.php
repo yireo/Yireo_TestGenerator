@@ -8,8 +8,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Yireo\TestGenerator\Generator\UnitTestGenerator;
-use Yireo\TestGenerator\Generator\IntegrationTestGenerator;
+use Yireo\TestGenerator\Generator\UnitTest\UnitTestGenerator;
+use Yireo\TestGenerator\Generator\IntegrationTest\IntegrationTestGenerator;
 
 class GenerateCommand extends Command
 {
@@ -66,7 +66,7 @@ class GenerateCommand extends Command
         $className = (string)$input->getArgument('className');
 
         if ($type === 'integration' && !empty($className)) {
-            $this->integrationTestGenerator->generateTest($moduleName, $className, $output, $overrideExisting);
+            $this->integrationTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
             return Command::SUCCESS;
         }
 
@@ -76,7 +76,7 @@ class GenerateCommand extends Command
         }
 
         if ($type === 'unit' && !empty($className)) {
-            $this->unitTestGenerator->generateTest($moduleName, $className, $output, $overrideExisting);
+            $this->unitTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
             return Command::SUCCESS;
         }
 

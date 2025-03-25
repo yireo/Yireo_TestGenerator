@@ -14,7 +14,7 @@ Generate integration tests for the module `Yireo_Example` if they don't exist ye
 bin/magento yireo:test:generate Yireo_Example
 ```
 
-Or generate integration tests, overriding existing tests as well (DANGEROUS):
+Or generate integration tests, overriding existing tests as well (DANGEROUS) unless there is a token `@test-generator-skip-override` found in the test file contents:
 ```bash
 bin/magento yireo:test:generate Yireo_Example --override-existing=1
 ```
@@ -48,7 +48,7 @@ specific config test case to be created, as long as the PHP class name matches w
 ```xml
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <type name="Yireo\TestGenerator\Generator\IntegrationTestGenerator">
+    <type name="Yireo\TestGenerator\Generator\IntegrationTest\AdditionalTestGeneratorListing">
         <arguments>
             <argument name="testGenerators" xsi:type="array">
                 <item name="custom" xsi:type="object">YireoTraining\ExampleTestGenerator\Generator\IntegrationTest\CustomTestGenerator</item>
@@ -58,9 +58,10 @@ specific config test case to be created, as long as the PHP class name matches w
 </config>
 ```
 
-This generator class needs to implement `\Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface`. See the
+This generator class needs to implement `\Yireo\TestGenerator\Generator\IntegrationTest\SourceTestGeneratorInterface`. See the
 `\Yireo\TestGenerator\Generator\IntegrationTest\ConfigTestGenerator` for a full example.
 
 ## Todo
 - Move the AI mechanisms in separate modules
 - Allow to configure the AI prompt yourself
+- Add a dry-run flag

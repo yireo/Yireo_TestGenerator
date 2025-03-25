@@ -1,25 +1,25 @@
 <?php declare(strict_types=1);
 
-namespace Yireo\TestGenerator\Generator;
+namespace Yireo\TestGenerator\Generator\UnitTest;
 
 use Magento\Framework\ObjectManagerInterface;
-use Yireo\TestGenerator\Generator\IntegrationTest\GenericTestGenerator;
-use Yireo\TestGenerator\Generator\IntegrationTest\TestGeneratorInterface;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\SourceTestGeneratorInterface;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\GenericSourceTestGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
 
-class IntegrationTestGeneratorListing
+class SourceTestGeneratorListing
 {
     public function __construct(
         private ObjectManagerInterface $objectManager,
-        private GenericTestGenerator $genericTestGenerator,
+        private GenericSourceTestGenerator $genericSourceTestGenerator,
         private array $testGenerators = [],
     ) {
     }
 
-    public function selectGenerator(ClassStub $classStub): TestGeneratorInterface
+    public function selectGenerator(ClassStub $classStub): SourceTestGeneratorInterface
     {
         foreach ($this->getGenerators() as $testGenerator) {
-            if (false === $testGenerator instanceof TestGeneratorInterface) {
+            if (false === $testGenerator instanceof SourceTestGeneratorInterface) {
                 continue;
             }
 
@@ -28,15 +28,19 @@ class IntegrationTestGeneratorListing
             }
         }
 
-        return $this->genericTestGenerator;
+        return $this->genericSourceTestGenerator;
     }
 
     /**
-     * @return TestGeneratorInterface[]
+     * @return SourceTestGeneratorInterface[]
      */
     public function getGenerators(): array
     {
         $generators = $this->testGenerators;
+        if (empty($generators)) {
+            return [];
+        }
+
         usort($generators, function (array $a, array $b) {
             return $a['sort_order'] <=> $b['sort_order'];
         });

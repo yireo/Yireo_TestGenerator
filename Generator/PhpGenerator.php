@@ -4,12 +4,11 @@ namespace Yireo\TestGenerator\Generator;
 
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\PsrPrinter;
 
-class PhpGenerator
+class PhpGenerator implements PhpGeneratorInterface
 {
     public function __construct(
         private ClassType $classType,
@@ -19,32 +18,46 @@ class PhpGenerator
     ) {
     }
 
+    public function getClassType(): ClassType
+    {
+        return $this->classType;
+    }
+
+    public function getNamespace(): PhpNamespace
+    {
+        return $this->namespace;
+    }
+
     public function addClassMethod(
         string $methodName,
         string $methodBody,
-    ): Method {
-        return $this->classType->addMethod($methodName)
+    ): void {
+        $this->getClassType()->addMethod($methodName)
             ->setFinal()
+            ->setReturnType('void')
             ->setPublic()
             ->setBody($methodBody);
     }
 
-    public function addTrait(string $traitName)
+    public function addTrait(string $traitName): void
     {
-        $this->classType->addTrait($traitName);
+        $this->getClassType()->addTrait($traitName);
         $this->addUse($traitName);
     }
 
-    public function addUse(string $namespace, ?string $alias = null)
+    public function addUse(string $namespace, ?string $alias = null): void
     {
-        $this->namespace->addUse($namespace, $alias);
+        $this->getNamespace()->addUse($namespace, $alias);
     }
 
-    public function addConstant(string $name, string $value)
+    public function addConstant(string $name, string $value): void
     {
-        $this->classType->addConstant($name, $value);
+        $this->getClassType()->addConstant($name, $value);
     }
 
+    /**
+     * @deprecated
+     **/
     public function generate(string $file):bool
     {
         $this->writer->writeFile($file, $this->output());
@@ -53,8 +66,8 @@ class PhpGenerator
 
     public function output(): string
     {
-        $this->namespace->add($this->classType);
-        $this->file->addNamespace($this->namespace);
+        $this->getNamespace()->add($this->getClassType());
+        $this->file->addNamespace($this->getNamespace());
         return (new PsrPrinter)->printFile($this->file);
     }
 }

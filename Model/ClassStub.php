@@ -2,8 +2,10 @@
 
 namespace Yireo\TestGenerator\Model;
 
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Filesystem;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -11,6 +13,7 @@ class ClassStub
 {
     public function __construct(
         private ComponentRegistrar $componentRegistrar,
+        private Filesystem $filesystem,
         private string $moduleName,
         private string $fullQualifiedClassName
     ) {
@@ -68,13 +71,22 @@ class ClassStub
      */
     public function getClassMethods(): array
     {
-        $reflectionClass = new ReflectionClass($this->getFullQualifiedClassName());
-
-        return $reflectionClass->getMethods();
+        return $this->getReflection()->getMethods();
     }
 
     public function getInstance()
     {
         return ObjectManager::getInstance()->get($this->getFullQualifiedClassName());
+    }
+
+    public function getReflection(): ReflectionClass
+    {
+        return new ReflectionClass($this->getFullQualifiedClassName());
+    }
+
+    public function getContents(): string
+    {
+        $reader = $this->filesystem->getDirectoryRead(DirectoryList::ROOT);
+        return (string) $reader->readFile($this->getAbsolutePath());
     }
 }

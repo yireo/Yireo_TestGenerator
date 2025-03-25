@@ -3,11 +3,13 @@
 namespace Yireo\TestGenerator\Test\Unit\Model;
 
 use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Filesystem;
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Model\ClassStubFactory;
 use Yireo\TestGenerator\Test\Unit\Stub\ObjectManagerStub;
 
+// @test-generator-skip-override
 class ClassStubFactoryTest extends TestCase
 {
     public function testCreate()
@@ -70,6 +72,7 @@ class ClassStubFactoryTest extends TestCase
     {
         $objectManager = new ObjectManagerStub();
         $objectManager->set(ComponentRegistrar::class, $this->createMock(ComponentRegistrar::class));
+        $objectManager->set(Filesystem::class, $this->createMock(Filesystem::class));
 
         // @phpstan-ignore-next-line
         return new ClassStubFactory($objectManager);
