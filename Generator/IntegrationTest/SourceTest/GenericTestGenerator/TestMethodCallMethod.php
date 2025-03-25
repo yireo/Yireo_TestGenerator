@@ -3,20 +3,36 @@
 namespace Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator;
 
 use ReflectionMethod;
+use Yireo\TestGenerator\Generator\PhpGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
 
 class TestMethodCallMethod
 {
-    public function get(ClassStub $classStub, ReflectionMethod $reflectionMethod): string
-    {
+    public function get(
+        PhpGenerator $phpGenerator,
+        ClassStub $classStub,
+        ReflectionMethod $reflectionMethod
+    ): string {
         $className = $classStub->getClassName();
         $variableName = lcfirst($className);
 
+
+        $returnType = $reflectionMethod->getReturnType()?->getName();
+
+        if (!empty($returnType)
+            && (class_exists('\\'.$returnType) || interface_exists('\\'.$returnType))) {
+            $phpGenerator->addUse($returnType);
+            $assertion = "\$this->assertInstanceOf(\\{$returnType}::class, \$actual)";
+        } elseif ($returnType === 'array') {
+            $assertion = "\$this->assertSame([], \$actual)";
+        } else {
+            $assertion = "\$this->assertEquals('', \$actual)";
+        }
+
         return <<<EOF
-\$expected = '';
 \${$variableName} = \$this->getInstance();
 \$actual = \${$variableName}->{$reflectionMethod->getName()}();
-\$this->assertInstanceOf(\$expected, \$actual);
+$assertion;
 EOF;
     }
 }

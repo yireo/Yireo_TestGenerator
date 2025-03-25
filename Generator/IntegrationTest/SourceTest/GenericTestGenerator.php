@@ -56,7 +56,7 @@ class GenericTestGenerator extends AbstractTestGenerator
 
             $phpGenerator->addClassMethod(
                 'test'.ucfirst($reflectionMethod->getName()),
-                $this->testMethodCallMethod->get($classStub, $reflectionMethod)
+                $this->testMethodCallMethod->get($phpGenerator, $classStub, $reflectionMethod)
             );
         }
     }

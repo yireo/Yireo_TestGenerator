@@ -37,6 +37,7 @@ class SourceTestGeneratorListing
     public function getGenerators(): array
     {
         $generators = $this->testGenerators;
+
         if (empty($generators)) {
             return [];
         }
