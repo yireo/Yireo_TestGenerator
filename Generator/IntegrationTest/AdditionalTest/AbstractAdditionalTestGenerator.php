@@ -2,7 +2,6 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest\AdditionalTest;
 
-use Yireo\TestGenerator\Generator\ModuleContext;
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
 use Yireo\TestGenerator\Generator\PhpGeneratorInterface;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -15,12 +14,9 @@ abstract class AbstractAdditionalTestGenerator implements AdditionalTestGenerato
         protected ClassStubFactory $classStubFactory,
     ) {
     }
-
-    abstract public function getTestStub(ModuleContext $moduleContext): ClassStub;
-
-    protected function getPhpGenerator(ClassStub $testClassStub): PhpGeneratorInterface
+    protected function getPhpGenerator(ClassStub $ClassStub): PhpGeneratorInterface
     {
-        return $this->phpGeneratorFactory->create($testClassStub);
+        return $this->phpGeneratorFactory->create($ClassStub);
     }
 
     protected function createTestStub(string $moduleName, string $fullQualifiedClassName): ClassStub

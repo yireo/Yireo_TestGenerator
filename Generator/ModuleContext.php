@@ -44,11 +44,16 @@ class ModuleContext
         return $testPath;
     }
 
-    public function getTestNamespace(): string
+    public function getNamespace(): string
     {
         $moduleNameParts = explode('_', $this->getModuleName());
 
-        return $moduleNameParts[0].'\\'.$moduleNameParts[1].'\\Test\\'.ucfirst($this->testType);
+        return $moduleNameParts[0].'\\'.$moduleNameParts[1];
+    }
+
+    public function getTestNamespace(): string
+    {
+        return $this->getNamespace().'\\Test\\'.ucfirst($this->testType);
     }
 
     public function getWriter(): WriteInterface

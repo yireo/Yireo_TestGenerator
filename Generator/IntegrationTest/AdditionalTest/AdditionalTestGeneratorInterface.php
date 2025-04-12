@@ -2,15 +2,12 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest\AdditionalTest;
 
+use Symfony\Component\Console\Output\OutputInterface;
 use Yireo\TestGenerator\Generator\ModuleContext;
-use Yireo\TestGenerator\Generator\PhpGeneratorInterface;
-use Yireo\TestGenerator\Model\ClassStub;
 
 interface AdditionalTestGeneratorInterface
 {
-    public function apply(ModuleContext $moduleContext): bool;
+    public function apply(ModuleContext $moduleContext, bool $overrideExisting): bool;
 
-    public function getTestStub(ModuleContext $moduleContext): ClassStub;
-
-    public function generate(ModuleContext $moduleContext): PhpGeneratorInterface;
+    public function generate(ModuleContext $moduleContext, OutputInterface $output): bool;
 }

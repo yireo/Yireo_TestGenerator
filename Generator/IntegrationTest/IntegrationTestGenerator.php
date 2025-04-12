@@ -19,30 +19,29 @@ class IntegrationTestGenerator
     ) {
     }
 
-    public function generateAll(
+    public function generateAdditionalTests(
         string $moduleName,
         OutputInterface $output,
-        bool $overrideExisting
-    ) {
+        bool $overrideExisting,
+    ): void {
         $moduleContext = $this->getModuleContext($moduleName);
 
         foreach ($this->additionalTestGeneratorListing->getGenerators() as $testGenerator) {
-            $testStub = $testGenerator->getTestStub($moduleContext);
-
-            if (false === $overrideExisting || true === $moduleContext->getWriter()->isExist($testStub->getAbsolutePath())) {
+            if (false === $testGenerator->apply($moduleContext, $overrideExisting)) {
                 continue;
             }
 
-            if (false === $testGenerator->apply($moduleContext)) {
-                continue;
-            }
-
-            $testFile = $testStub->getAbsolutePath();
-            $phpGenerator = $testGenerator->generate($moduleContext);
-
-            $output->writeln('Writing '.$testStub->getRelativePath());
-            $moduleContext->getWriter()->writeFile($testFile, $phpGenerator->output());
+            $output->writeln('Calling '.get_class($testGenerator));
+            $testGenerator->generate($moduleContext, $output);
         }
+    }
+
+    public function generateSourceTests(
+        string $moduleName,
+        OutputInterface $output,
+        bool $overrideExisting,
+    ): void {
+        $moduleContext = $this->getModuleContext($moduleName);
 
         $classNames = $this->classCollector->collect($moduleContext->getPath());
         foreach ($classNames as $className) {

@@ -2,53 +2,87 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest\AdditionalTest;
 
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Component\ComponentRegistrar;
+use Symfony\Component\Console\Output\OutputInterface;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsEnabled;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegistered;
-use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegisteredForReal;
 use Yireo\TestGenerator\Generator\ModuleContext;
-use Yireo\TestGenerator\Generator\PhpGenerator;
-use Yireo\TestGenerator\Generator\PhpGeneratorInterface;
-use Yireo\TestGenerator\Model\ClassStub;
+use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
+use Yireo\TestGenerator\Model\ClassStubFactory;
 
 class ModuleTestGenerator extends AbstractAdditionalTestGenerator
 {
-    public function apply(ModuleContext $moduleContext): bool
-    {
-        return true;
+    public function __construct(
+        private ComponentRegistrar $componentRegistrar,
+        PhpGeneratorFactory $phpGeneratorFactory,
+        ClassStubFactory $classStubFactory
+    ) {
+        parent::__construct($phpGeneratorFactory, $classStubFactory);
     }
 
-    public function getTestStub(ModuleContext $moduleContext): ClassStub
+    public function apply(ModuleContext $moduleContext, bool $overrideExisting): bool
     {
-        return $this->createTestStub(
+        if ($overrideExisting) {
+            return true;
+        }
+
+        if (false === $moduleContext->getWriter()->isExist($this->getTestFile($moduleContext))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function generate(ModuleContext $moduleContext, OutputInterface $output): bool
+    {
+        $testStub = $this->createTestStub(
             $moduleContext->getModuleName(),
             $moduleContext->getTestNamespace().'\\ModuleTest'
         );
-    }
 
-    public function generate(ModuleContext $moduleContext): PhpGeneratorInterface
-    {
-        $testStub = $this->getTestStub($moduleContext);
         $phpGenerator = $this->getPhpGenerator($testStub);
 
         $phpGenerator->addTrait(AssertModuleIsEnabled::class);
         $phpGenerator->addTrait(AssertModuleIsRegistered::class);
-        $phpGenerator->addTrait(AssertModuleIsRegisteredForReal::class);
 
         $phpGenerator->addClassMethod(
             'testModule',
             $this->getMethodModuleTest($moduleContext->getModuleName())
         );
 
-        return $phpGenerator;
+
+        $testFile = $this->getTestFile($moduleContext);
+        $moduleContext->getWriter()->writeFile($testFile, $phpGenerator->output());
+
+        return true;
     }
 
     private function getMethodModuleTest(string $moduleName): string
     {
+        $modulePath = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, $moduleName);
+        $moduleFile = $modulePath . '/etc/module.xml';
+        $xml = simplexml_load_file($moduleFile);
+
+        $moduleStrings = "'".$moduleName."',\n";
+        foreach ($xml->module->sequence->children() as $module) {
+            $moduleStrings .= "'".(string)$module['name']."',\n";
+        }
+
         return <<<EOF
-\$moduleName = '$moduleName';
-\$this->assertModuleIsEnabled(\$moduleName);
-\$this->assertModuleIsRegistered(\$moduleName);
-\$this->assertModuleIsRegisteredForReal(\$moduleName);
+\$moduleNames = [
+{$moduleStrings}
+];
+
+foreach (\$moduleNames as \$moduleName) {
+    \$this->assertModuleIsEnabled(\$moduleName);
+    \$this->assertModuleIsRegistered(\$moduleName);
+}
 EOF;
+    }
+
+    private function getTestFile(ModuleContext $moduleContext): string
+    {
+        return rtrim($moduleContext->getTestPath(), '/').'/ModuleTest.php';
     }
 }

@@ -33,6 +33,8 @@ class GenerateCommand extends Command
             ->addArgument('className', InputArgument::OPTIONAL, 'Class name')
             ->addOption('override-existing', null, InputOption::VALUE_OPTIONAL, 'Override existing tests', false)
             ->addOption('type', null, InputOption::VALUE_OPTIONAL, 'Type of tests (unit, integration)', 'integration')
+            ->addOption('generate-source-tests', null, InputOption::VALUE_OPTIONAL, 'Generate source tests', '1')
+            ->addOption('generate-additional-tests', null, InputOption::VALUE_OPTIONAL, 'Generate additional tests', '1')
         ;
     }
 
@@ -56,6 +58,8 @@ class GenerateCommand extends Command
         }
 
         $overrideExisting = (bool)$input->getOption('override-existing');
+        $generateSourceTests = (bool)$input->getOption('generate-source-tests');
+        $generateAdditionalTests = (bool)$input->getOption('generate-additional-tests');
 
         $type = (string)$input->getOption('type');
         if (false === in_array($type, ['unit', 'integration'])) {
@@ -67,22 +71,22 @@ class GenerateCommand extends Command
 
         if ($type === 'integration' && !empty($className)) {
             $this->integrationTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
-            return Command::SUCCESS;
         }
 
-        if ($type === 'integration') {
-            $this->integrationTestGenerator->generateAll($moduleName, $output, $overrideExisting);
-            return Command::SUCCESS;
+        if ($type === 'integration' && $generateSourceTests && empty($className)) {
+            $this->integrationTestGenerator->generateSourceTests($moduleName, $output, $overrideExisting);
+        }
+
+        if ($type === 'integration' && $generateAdditionalTests && empty($className)) {
+            $this->integrationTestGenerator->generateAdditionalTests($moduleName, $output, $overrideExisting);
         }
 
         if ($type === 'unit' && !empty($className)) {
             $this->unitTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
-            return Command::SUCCESS;
         }
 
         if ($type === 'unit') {
             $this->unitTestGenerator->generateAll($moduleName, $output, $overrideExisting);
-            return Command::SUCCESS;
         }
 
         return Command::SUCCESS;

@@ -3,7 +3,6 @@
 namespace Yireo\TestGenerator\Generator;
 
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\Method;
 
 interface PhpGeneratorInterface
 {
