@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest\SourceTest;
 
+use Magento\Framework\App\State;
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
 use Yireo\TestGenerator\Generator\PhpGeneratorInterface;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -11,6 +12,7 @@ abstract class AbstractTestGenerator implements SourceTestGeneratorInterface
 {
     public function __construct(
         protected PhpGeneratorFactory $phpGeneratorFactory,
+        protected State $appState
     ) {
     }
 
