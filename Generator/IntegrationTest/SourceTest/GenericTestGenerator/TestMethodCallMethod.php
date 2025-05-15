@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator;
 
+use PHPStan\BetterReflection\Reflection\Adapter\ReflectionUnionType;
 use ReflectionMethod;
 use Yireo\TestGenerator\Generator\PhpGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -16,8 +17,11 @@ class TestMethodCallMethod
         $className = $classStub->getClassName();
         $variableName = lcfirst($className);
 
-
-        $returnType = $reflectionMethod->getReturnType()?->getName();
+        $reflectedReturnType = $reflectionMethod->getReturnType();
+        $returnType = null;
+        if (is_object($reflectedReturnType) && false === $reflectedReturnType instanceof \ReflectionUnionType) {
+            $returnType = $reflectedReturnType->getName();
+        }
 
         if (!empty($returnType)
             && (class_exists('\\'.$returnType) || interface_exists('\\'.$returnType))) {

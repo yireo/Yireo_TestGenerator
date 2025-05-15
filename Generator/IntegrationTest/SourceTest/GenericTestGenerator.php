@@ -17,7 +17,8 @@ class GenericTestGenerator extends AbstractTestGenerator
         private ObjectInstantiation $objectInstantiation,
         private TestInstantiationMethod $testInstantiationMethod,
         private TestMethodCallMethod $testMethodCallMethod,
-        PhpGeneratorFactory $phpGeneratorFactory) {
+        PhpGeneratorFactory $phpGeneratorFactory,
+    ) {
         parent::__construct($phpGeneratorFactory);
     }
 

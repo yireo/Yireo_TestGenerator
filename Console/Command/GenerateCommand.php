@@ -3,6 +3,7 @@
 namespace Yireo\TestGenerator\Console\Command;
 
 use Composer\Console\Input\InputArgument;
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +18,7 @@ class GenerateCommand extends Command
         private IntegrationTestGenerator $integrationTestGenerator,
         private UnitTestGenerator $unitTestGenerator,
         private ComponentRegistrar $componentRegistrar,
+        private AppState $appState,
         $name = null
     ) {
         parent::__construct($name);
@@ -45,6 +47,8 @@ class GenerateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->appState->setAreaCode('frontend');
+
         $moduleName = (string)$input->getArgument('moduleName');
         if (empty($moduleName)) {
             $output->writeln('<error>No module name given as argument</error>');
