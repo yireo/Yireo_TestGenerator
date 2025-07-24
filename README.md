@@ -26,7 +26,7 @@ bin/magento yireo:test:generate Yireo_Example --type=unit
 
 Generate unit tests, overriding the original test, for a specific class only:
 ````bash
-bin/magento yireo:test:generate --override-existing 1 --type unit -- 'Yireo_LokiCheckoutAccountType' '\Yireo\LokiCheckoutAccountType\Config\Source\AccountTypeOptions'
+bin/magento yireo:test:generate --override-existing 1 --type unit -- 'LokiCheckout_AccountType' '\Loki\CheckoutAccountType\Config\Source\AccountTypeOptions'
 ````
 
 ### AI generated tests
