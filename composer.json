@@ -5,10 +5,10 @@
     "type": "magento2-module",
     "require": {
         "magento/framework": "^101.0.1|^101.1|^102.0|^103.0",
-        "nette/php-generator": "^4.1",
-        "openai-php/client": "^0.10.3",
         "mozex/anthropic-php": "^1.0",
-        "nette/utils": "^4.0"
+        "nette/php-generator": "^4.1",
+        "nette/utils": "^4.0",
+        "openai-php/client": "^0.10.3"
     },
     "license": [
         "OSL-3.0"
