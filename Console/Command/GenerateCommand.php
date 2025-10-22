@@ -2,10 +2,10 @@
 
 namespace Yireo\TestGenerator\Console\Command;
 
-use Composer\Console\Input\InputArgument;
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
