@@ -1,0 +1,32 @@
+{
+    "sequence": [],
+    "modules": [],
+    "components": [],
+    "config": [
+        {
+            "path": "yireo_test_generator\/general\/openai_enabled",
+            "label": "General Settings > Enable OpenAI API",
+            "description": ""
+        },
+        {
+            "path": "yireo_test_generator\/general\/openai_api_key",
+            "label": "General Settings > OpenAI API key",
+            "description": ""
+        },
+        {
+            "path": "yireo_test_generator\/general\/anthropic_enabled",
+            "label": "General Settings > Enable Anthropic API",
+            "description": ""
+        },
+        {
+            "path": "yireo_test_generator\/general\/anthropic_api_key",
+            "label": "General Settings > Anthropic API key",
+            "description": ""
+        }
+    ],
+    "tests": {
+        "unit": 85,
+        "integration": 0,
+        "functional": 0
+    }
+}
