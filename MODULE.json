@@ -4,22 +4,22 @@
     "components": [],
     "config": [
         {
-            "path": "yireo_test_generator\/general\/openai_enabled",
+            "path": "yireo_test_generator/general/openai_enabled",
             "label": "General Settings > Enable OpenAI API",
             "description": ""
         },
         {
-            "path": "yireo_test_generator\/general\/openai_api_key",
+            "path": "yireo_test_generator/general/openai_api_key",
             "label": "General Settings > OpenAI API key",
             "description": ""
         },
         {
-            "path": "yireo_test_generator\/general\/anthropic_enabled",
+            "path": "yireo_test_generator/general/anthropic_enabled",
             "label": "General Settings > Enable Anthropic API",
             "description": ""
         },
         {
-            "path": "yireo_test_generator\/general\/anthropic_api_key",
+            "path": "yireo_test_generator/general/anthropic_api_key",
             "label": "General Settings > Anthropic API key",
             "description": ""
         }
@@ -28,5 +28,7 @@
         "unit": 85,
         "integration": 0,
         "functional": 0
-    }
+    },
+    "module_name": "Yireo_TestGenerator",
+    "composer_name": "yireo/magento2-test-generator"
 }
