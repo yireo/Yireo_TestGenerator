@@ -74,7 +74,6 @@ class ClassStubFactoryTest extends TestCase
         $objectManager->set(ComponentRegistrar::class, $this->createMock(ComponentRegistrar::class));
         $objectManager->set(Filesystem::class, $this->createMock(Filesystem::class));
 
-        // @phpstan-ignore-next-line
         return new ClassStubFactory($objectManager);
     }
 }

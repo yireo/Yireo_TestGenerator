@@ -11,6 +11,9 @@
         "openai-php/client": "^0.10.3",
         "php": ">=8.2 <8.6"
     },
+    "require-dev": {
+        "yireo/magento2-integration-test-helper": ">=0.0.23"
+    },
     "license": [
         "OSL-3.0"
     ],
