@@ -19,25 +19,38 @@ use Yireo\TestGenerator\Utilities\ClassCollector;
 // @test-generator-skip-override
 class IntegrationTestGeneratorTest extends TestCase
 {
-    public function testGenerateAll(): void
+    public function testGenerateAdditionalTests(): void
     {
-        // Mock dependencies
-        $classCollector = $this->createMock(ClassCollector::class);
-        $classStubFactory = $this->createMock(ClassStubFactory::class);
+        $moduleContext = $this->createMock(ModuleContext::class);
         $moduleContextFactory = $this->createMock(ModuleContextFactory::class);
-        $sourceTestGeneratorListing = $this->createMock(SourceTestGeneratorListing::class);
-        $additionalTestGeneratorListing = $this->createMock(AdditionalTestGeneratorListing::class);
+        $moduleContextFactory->method('create')
+            ->with('Vendor_Module', 'integration')
+            ->willReturn($moduleContext);
+
+        $output = $this->createMock(OutputInterface::class);
+
+        $appliedTestGenerator = $this->createMock(AdditionalTestGeneratorInterface::class);
+        $appliedTestGenerator->method('apply')->with($moduleContext, true)->willReturn(true);
+        $appliedTestGenerator->expects($this->once())->method('generate')->with($moduleContext, $output);
+
+        $skippedTestGenerator = $this->createMock(AdditionalTestGeneratorInterface::class);
+        $skippedTestGenerator->method('apply')->willReturn(false);
+        $skippedTestGenerator->expects($this->never())->method('generate');
+
+        $additionalTestGeneratorListing = new AdditionalTestGeneratorListing([
+            $appliedTestGenerator,
+            $skippedTestGenerator,
+        ]);
 
         $generator = new IntegrationTestGenerator(
-            $classCollector,
-            $classStubFactory,
+            $this->createMock(ClassCollector::class),
+            $this->createMock(ClassStubFactory::class),
             $moduleContextFactory,
-            $sourceTestGeneratorListing,
+            $this->createMock(SourceTestGeneratorListing::class),
             $additionalTestGeneratorListing
         );
 
-        $output = $this->createMock(OutputInterface::class);
-        $generator->generateAll('Vendor_Module', $output, true);
+        $generator->generateAdditionalTests('Vendor_Module', $output, true);
     }
 
     public function testGenerateTestPerClassWithExistingTest(): void

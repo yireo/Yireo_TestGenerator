@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Test\Unit\Console\Command;
 
+use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -20,11 +21,13 @@ class GenerateCommandTest extends TestCase
         $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $this->assertEquals('yireo:test:generate', $command->getName());
@@ -36,11 +39,13 @@ class GenerateCommandTest extends TestCase
         $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $input = $this->createMock(InputInterface::class);
@@ -59,11 +64,13 @@ class GenerateCommandTest extends TestCase
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn('/invalid/path');
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $input = $this->createMock(InputInterface::class);
@@ -82,11 +89,13 @@ class GenerateCommandTest extends TestCase
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         /** @var InputInterface|MockObject $input */
@@ -116,11 +125,13 @@ class GenerateCommandTest extends TestCase
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $input = $this->createMock(InputInterface::class);
@@ -143,18 +154,23 @@ class GenerateCommandTest extends TestCase
     {
         $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
         $integrationTestGenerator->expects($this->once())
-            ->method('generateAll')
+            ->method('generateSourceTests')
+            ->with('Vendor_Module', $this->isInstanceOf(OutputInterface::class), false);
+        $integrationTestGenerator->expects($this->once())
+            ->method('generateAdditionalTests')
             ->with('Vendor_Module', $this->isInstanceOf(OutputInterface::class), false);
 
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         /** @var InputInterface|MockObject $input */
@@ -165,7 +181,9 @@ class GenerateCommandTest extends TestCase
         ]);
         $input->method('getOption')->willReturnMap([
             ['type', 'integration'],
-            ['override-existing', false]
+            ['override-existing', false],
+            ['generate-source-tests', '1'],
+            ['generate-additional-tests', '1'],
         ]);
 
         /** @var OutputInterface|MockObject $output */
@@ -186,11 +204,13 @@ class GenerateCommandTest extends TestCase
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $input = $this->createMock(InputInterface::class);
@@ -220,11 +240,13 @@ class GenerateCommandTest extends TestCase
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
+        $appState = $this->createMock(AppState::class);
 
         $command = new GenerateCommand(
             $integrationTestGenerator,
             $unitTestGenerator,
-            $componentRegistrar
+            $componentRegistrar,
+            $appState
         );
 
         $input = $this->createMock(InputInterface::class);

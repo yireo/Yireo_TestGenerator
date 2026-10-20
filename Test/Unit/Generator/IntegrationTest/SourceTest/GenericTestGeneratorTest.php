@@ -5,6 +5,9 @@ namespace Yireo\TestGenerator\Test\Unit\Generator\IntegrationTest\SourceTest;
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\AbstractTestGenerator;
 use Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator;
+use Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator\ObjectInstantiation;
+use Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator\TestInstantiationMethod;
+use Yireo\TestGenerator\Generator\IntegrationTest\SourceTest\GenericTestGenerator\TestMethodCallMethod;
 use Yireo\TestGenerator\Generator\PhpGenerator;
 use Yireo\TestGenerator\Generator\PhpGeneratorFactory;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -15,9 +18,12 @@ class GenericTestGeneratorTest extends TestCase
     public function testApply(): void
     {
         $classStub = $this->createMock(ClassStub::class);
-        $phpGeneratorFactory = $this->createMock(PhpGeneratorFactory::class);
-
-        $genericTestGenerator = new GenericTestGenerator($phpGeneratorFactory);
+        $genericTestGenerator = new GenericTestGenerator(
+            $this->createMock(ObjectInstantiation::class),
+            $this->createMock(TestInstantiationMethod::class),
+            $this->createMock(TestMethodCallMethod::class),
+            $this->createMock(PhpGeneratorFactory::class)
+        );
         $result = $genericTestGenerator->apply($classStub);
         
         $this->assertTrue($result);
