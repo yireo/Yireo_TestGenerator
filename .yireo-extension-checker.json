@@ -1,0 +1,7 @@
+{
+    "ignore": [
+        "Yireo_IntegrationTestHelper",
+        "yireo/magento2-integration-test-helper",
+        "phpunit/phpunit"
+    ]
+}
