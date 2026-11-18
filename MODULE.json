@@ -30,5 +30,7 @@
         "functional": 0
     },
     "module_name": "Yireo_TestGenerator",
-    "composer_name": "yireo/magento2-test-generator"
+    "composer_name": "yireo/magento2-test-generator",
+    "phpcs_severity": "9",
+    "phpstan_level": "1"
 }
