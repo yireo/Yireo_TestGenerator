@@ -1,5 +1,8 @@
 {
-    "sequence": [],
+    "sequence": [
+        "Magento_Backend",
+        "Magento_Config"
+    ],
     "modules": [],
     "components": [],
     "config": [
