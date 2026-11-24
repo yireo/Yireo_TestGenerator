@@ -133,4 +133,69 @@ class ModuleTestGeneratorTest extends TestCase
             $this->createMock(ClassStubFactory::class)
         );
     }
+
+    public function testGenerateEscapesModuleNames(): void
+    {
+        $body = $this->generateMethodBody(
+            '<?xml version="1.0"?><config><module name="Vendor_Module">'
+            .'<sequence><module name="Evil\'];system(\'id\');//"/></sequence></module></config>'
+        );
+
+        $this->assertStringContainsString("'Evil\\'];system(\\'id\\');//',", $body);
+        $this->assertStringNotContainsString("'Evil'];", $body);
+    }
+
+    public function testGenerateWithoutSequence(): void
+    {
+        $body = $this->generateMethodBody(
+            '<?xml version="1.0"?><config><module name="Vendor_Module"/></config>'
+        );
+
+        $this->assertStringContainsString("'Vendor_Module',", $body);
+    }
+
+    public function testGenerateWithInvalidModuleXml(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unable to read');
+
+        $this->generateMethodBody('<config><module');
+    }
+
+    private function generateMethodBody(string $moduleXml): string
+    {
+        $moduleName = 'Vendor_Module';
+        $this->tmpModulePath = sys_get_temp_dir().'/'.uniqid('module-test-generator-');
+        mkdir($this->tmpModulePath.'/etc', 0777, true);
+        file_put_contents($this->tmpModulePath.'/etc/module.xml', $moduleXml);
+
+        $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $componentRegistrar->method('getPath')->willReturn($this->tmpModulePath);
+
+        $moduleContext = $this->createMock(ModuleContext::class);
+        $moduleContext->method('getModuleName')->willReturn($moduleName);
+        $moduleContext->method('getTestNamespace')->willReturn('Vendor\\Module\\Test\\Integration');
+        $moduleContext->method('getTestPath')->willReturn('/tmp/module/Test/Integration/');
+        $moduleContext->method('getWriter')->willReturn($this->createMock(WriteInterface::class));
+
+        $body = '';
+        $phpGenerator = $this->createMock(PhpGeneratorInterface::class);
+        $phpGenerator->method('output')->willReturn('foobar');
+        $phpGenerator->method('addClassMethod')->willReturnCallback(
+            function (string $name, string $methodBody) use (&$body): void {
+                $body = $methodBody;
+            }
+        );
+
+        $phpGeneratorFactory = $this->createMock(PhpGeneratorFactory::class);
+        $phpGeneratorFactory->method('create')->willReturn($phpGenerator);
+
+        $classStubFactory = $this->createMock(ClassStubFactory::class);
+        $classStubFactory->method('create')->willReturn($this->createMock(ClassStub::class));
+
+        $generator = new ModuleTestGenerator($componentRegistrar, $phpGeneratorFactory, $classStubFactory);
+        $generator->generate($moduleContext, $this->createMock(OutputInterface::class));
+
+        return $body;
+    }
 }

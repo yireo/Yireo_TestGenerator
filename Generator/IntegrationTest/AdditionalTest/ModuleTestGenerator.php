@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Generator\IntegrationTest\AdditionalTest;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Component\ComponentRegistrar;
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsEnabled;
 use Yireo\IntegrationTestHelper\Test\Integration\Traits\AssertModuleIsRegistered;
@@ -64,11 +65,22 @@ class ModuleTestGenerator extends AbstractAdditionalTestGenerator
     {
         $modulePath = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, $moduleName);
         $moduleFile = $modulePath . '/etc/module.xml';
-        $xml = simplexml_load_file($moduleFile);
+        $xmlOptions = LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING;
+        $xml = is_file($moduleFile) ? simplexml_load_file($moduleFile, null, $xmlOptions) : false;
+        if (false === $xml) {
+            throw new RuntimeException('Unable to read '.$moduleFile);
+        }
 
-        $moduleStrings = "'".$moduleName."',\n";
-        foreach ($xml->module->sequence->children() as $module) {
-            $moduleStrings .= "'".(string)$module['name']."',\n";
+        $moduleNames = [$moduleName];
+        if (isset($xml->module->sequence)) {
+            foreach ($xml->module->sequence->children() as $module) {
+                $moduleNames[] = (string)$module['name'];
+            }
+        }
+
+        $moduleStrings = '';
+        foreach ($moduleNames as $name) {
+            $moduleStrings .= var_export($name, true).",\n";
         }
 
         return <<<EOF
