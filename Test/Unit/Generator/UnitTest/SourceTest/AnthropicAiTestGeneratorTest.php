@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Test\Unit\Generator\UnitTest\SourceTest;
 
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Config\Config;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AiOutputValidator;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AnthropicAiTestGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
 use Yireo\TestGenerator\Utilities\AnthropicClientWrapper;
@@ -21,7 +22,7 @@ class AnthropicAiTestGeneratorTest extends TestCase
 
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
 
-        $generator = new AnthropicAiTestGenerator($config, $clientWrapper);
+        $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertFalse($result);
@@ -40,7 +41,7 @@ class AnthropicAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
 
-        $generator = new AnthropicAiTestGenerator($config, $clientWrapper);
+        $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertFalse($result);
@@ -59,7 +60,7 @@ class AnthropicAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
 
-        $generator = new AnthropicAiTestGenerator($config, $clientWrapper);
+        $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertTrue($result);
@@ -71,14 +72,15 @@ class AnthropicAiTestGeneratorTest extends TestCase
 
         $classStub = $this->createMock(ClassStub::class);
         $testClassStub = $this->createMock(ClassStub::class);
+        $testClassStub->method('getFullQualifiedClassName')->willReturn('Vendor\\Module\\Test\\Unit\\FooTest');
 
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
-        $clientWrapper->method('chat')->willReturn('Generated test content');
+        $clientWrapper->method('chat')->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
 
-        $generator = new AnthropicAiTestGenerator($config, $clientWrapper);
+        $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $output = $generator->generate($classStub, $testClassStub);
 
-        $this->assertEquals('Generated test content', $output);
+        $this->assertEquals("<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}", $output);
     }
 
     public function testGetPrompt(): void
@@ -91,7 +93,7 @@ class AnthropicAiTestGeneratorTest extends TestCase
 
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
 
-        $generator = new AnthropicAiTestGenerator($config, $clientWrapper);
+        $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
 
         $prompt = $generator->getPrompt($className, $testClassName, $classContents);
 

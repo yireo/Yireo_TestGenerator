@@ -2,6 +2,7 @@
 
 namespace Yireo\TestGenerator\Generator\UnitTest;
 
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Yireo\TestGenerator\Generator\ModuleContext;
 use Yireo\TestGenerator\Generator\ModuleContextFactory;
@@ -63,7 +64,14 @@ class UnitTestGenerator
         }
 
         $testGenerator = $this->generatorListing->selectGenerator($classStub);
-        $testContents = $testGenerator->generate($classStub, $testClassStub);
+        try {
+            $testContents = $testGenerator->generate($classStub, $testClassStub);
+        } catch (RuntimeException $exception) {
+            $output->writeln('<error>Skipping '.$className.': '.$exception->getMessage().'</error>');
+
+            return;
+        }
+
         if ($testContents instanceof PhpGenerator) {
             $testContents = $testContents->output();
         }

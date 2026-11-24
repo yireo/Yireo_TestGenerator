@@ -388,4 +388,55 @@ class UnitTestGeneratorTest extends TestCase
 
         $unitTestGenerator->generateTestPerClass($moduleName, $className, $outputMock, $overrideExisting);
     }
+
+    public function testGenerateTestPerClassSkipsWhenGeneratorRejectsOutput(): void
+    {
+        $outputMock = $this->createMock(OutputInterface::class);
+
+        $writerMock = $this->createMock(WriteInterface::class);
+        $writerMock->method('isExist')->willReturn(true);
+        $writerMock->method('readFile')->willReturn('<?php class ExistingTest {}');
+        $writerMock->expects($this->never())->method('writeFile');
+
+        $moduleContextMock = $this->createMock(ModuleContext::class);
+        $moduleContextMock->method('getPath')->willReturn('/path/to/module');
+        $moduleContextMock->method('getWriter')->willReturn($writerMock);
+
+        $moduleContextFactoryMock = $this->createMock(ModuleContextFactory::class);
+        $moduleContextFactoryMock->method('create')->willReturn($moduleContextMock);
+
+        $reflectionMock = $this->createMock(\ReflectionClass::class);
+        $reflectionMock->method('isFinal')->willReturn(false);
+        $reflectionMock->method('isAbstract')->willReturn(false);
+
+        $classStubMock = $this->createMock(ClassStub::class);
+        $classStubMock->method('getReflection')->willReturn($reflectionMock);
+
+        $testClassStubMock = $this->createMock(ClassStub::class);
+        $testClassStubMock->method('getRelativePath')->willReturn('Test/Unit/TestClassTest.php');
+
+        $classStubFactoryMock = $this->createMock(ClassStubFactory::class);
+        $classStubFactoryMock->method('create')->willReturn($classStubMock);
+        $classStubFactoryMock->method('createTest')->willReturn($testClassStubMock);
+
+        $testGeneratorMock = $this->createMock(SourceTestGeneratorInterface::class);
+        $testGeneratorMock->method('generate')
+            ->willThrowException(new \RuntimeException('AI response does not contain PHP code'));
+
+        $generatorListingMock = $this->createMock(SourceTestGeneratorListing::class);
+        $generatorListingMock->method('selectGenerator')->willReturn($testGeneratorMock);
+
+        $outputMock->expects($this->once())
+            ->method('writeln')
+            ->with('<error>Skipping TestClass: AI response does not contain PHP code</error>');
+
+        $unitTestGenerator = new UnitTestGenerator(
+            $this->createMock(ClassCollector::class),
+            $classStubFactoryMock,
+            $moduleContextFactoryMock,
+            $generatorListingMock
+        );
+
+        $unitTestGenerator->generateTestPerClass('TestModule', 'TestClass', $outputMock, true);
+    }
 }

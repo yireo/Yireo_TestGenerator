@@ -12,6 +12,7 @@ class OpenAiTestGenerator implements AiSourceTestGeneratorInterface
     public function __construct(
         private Config $config,
         private OpenAiClientWrapper $clientWrapper,
+        private AiOutputValidator $aiOutputValidator,
     ) {
     }
 
@@ -39,10 +40,7 @@ class OpenAiTestGenerator implements AiSourceTestGeneratorInterface
 
         $contents = $this->clientWrapper->chat($prompt, $openAiApiKey);
 
-        $contents = str_replace('```php', '', $contents);
-        $contents = str_replace('```', '', $contents);
-
-        return trim($contents);
+        return $this->aiOutputValidator->validate($contents, $testClassStub->getFullQualifiedClassName());
     }
 
     public function getPrompt(string $className, string $testClassName, string $classContents): string

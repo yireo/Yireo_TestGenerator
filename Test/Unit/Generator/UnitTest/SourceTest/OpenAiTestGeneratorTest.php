@@ -5,6 +5,7 @@ namespace Yireo\TestGenerator\Test\Unit\Generator\UnitTest\SourceTest;
 use OpenAI\Contracts\ClientContract;
 use PHPUnit\Framework\TestCase;
 use Yireo\TestGenerator\Config\Config;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AiOutputValidator;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AiSourceTestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\OpenAiTestGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -18,7 +19,7 @@ class OpenAiTestGeneratorTest extends TestCase
     {
         $config = $this->createMock(Config::class);
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $this->assertInstanceOf(AiSourceTestGeneratorInterface::class, $generator);
     }
 
@@ -30,7 +31,7 @@ class OpenAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertFalse($result);
@@ -45,7 +46,7 @@ class OpenAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertFalse($result);
@@ -60,7 +61,7 @@ class OpenAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->apply($classStub);
 
         $this->assertTrue($result);
@@ -73,22 +74,23 @@ class OpenAiTestGeneratorTest extends TestCase
         $classStub = $this->createMock(ClassStub::class);
 
         $testClassStub = $this->createMock(ClassStub::class);
+        $testClassStub->method('getFullQualifiedClassName')->willReturn('Vendor\\Module\\Test\\Unit\\FooTest');
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $clientWrapper->method('chat')->willReturn('Generated test content');
+        $clientWrapper->method('chat')->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
 
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->generate($classStub, $testClassStub);
 
         $this->assertIsString($result);
-        $this->assertEquals("Generated test content", $result);
+        $this->assertEquals("<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}", $result);
     }
 
     public function testGetPrompt(): void
     {
         $config = $this->createMock(Config::class);
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $generator = new OpenAiTestGenerator($config, $clientWrapper);
+        $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
 
         $className = 'Vendor\\Package\\TestClass';
         $testClassName = 'Vendor\\Package\\Test\\TestClassTest';
