@@ -1,7 +1,8 @@
 {
     "sequence": [
         "Magento_Backend",
-        "Magento_Config"
+        "Magento_Config",
+        "Magento_Store"
     ],
     "modules": [],
     "components": [],
