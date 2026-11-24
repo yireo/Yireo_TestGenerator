@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Console\Command;
 
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
+use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -76,7 +77,12 @@ class GenerateCommand extends Command
             return Command::INVALID;
         }
 
-        $className = (string)$input->getArgument('className');
+        $className = ltrim((string)$input->getArgument('className'), '\\');
+        if ($className !== '' && false === $this->isModuleClass($className, $path)) {
+            $output->writeln('<error>Class name is not a valid class of module '.$moduleName.'</error>');
+            return Command::INVALID;
+        }
+
         $allowAi = (bool)$input->getOption('ai');
 
         if ($type === 'integration' && !empty($className)) {
@@ -120,5 +126,24 @@ class GenerateCommand extends Command
         }
 
         return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+    }
+
+    private function isModuleClass(string $className, string $modulePath): bool
+    {
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)+$/', $className)) {
+            return false;
+        }
+
+        if (false === class_exists($className)) {
+            return false;
+        }
+
+        $classFile = realpath((string)(new ReflectionClass($className))->getFileName());
+        $modulePath = realpath($modulePath);
+        if (false === $classFile || false === $modulePath) {
+            return false;
+        }
+
+        return str_starts_with($classFile, rtrim($modulePath, '/').'/');
     }
 }

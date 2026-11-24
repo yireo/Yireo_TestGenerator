@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Test\Unit\Console\Command;
 
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Input\InputInterface;
@@ -119,7 +120,7 @@ class GenerateCommandTest extends TestCase
         $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
         $integrationTestGenerator->expects($this->once())
             ->method('generateTestPerClass')
-            ->with('Vendor_Module', 'SomeClass', $this->isInstanceOf(OutputInterface::class), false);
+            ->with('Vendor_Module', self::class, $this->isInstanceOf(OutputInterface::class), false);
 
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
 
@@ -137,7 +138,7 @@ class GenerateCommandTest extends TestCase
         $input = $this->createMock(InputInterface::class);
         $input->method('getArgument')->willReturnMap([
             ['moduleName', 'Vendor_Module'],
-            ['className', 'SomeClass']
+            ['className', '\\'.self::class]
         ]);
         $input->method('getOption')->willReturnMap([
             ['type', 'integration'],
@@ -200,7 +201,7 @@ class GenerateCommandTest extends TestCase
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $unitTestGenerator->expects($this->once())
             ->method('generateTestPerClass')
-            ->with('Vendor_Module', 'SomeClass', $this->isInstanceOf(OutputInterface::class), true, false);
+            ->with('Vendor_Module', self::class, $this->isInstanceOf(OutputInterface::class), true, false);
         $unitTestGenerator->expects($this->never())->method('generateAll');
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
@@ -217,7 +218,7 @@ class GenerateCommandTest extends TestCase
         $input = $this->createMock(InputInterface::class);
         $input->method('getArgument')->willReturnMap([
             ['moduleName', 'Vendor_Module'],
-            ['className', 'SomeClass']
+            ['className', '\\'.self::class]
         ]);
         $input->method('getOption')->willReturnMap([
             ['type', 'unit'],
@@ -329,5 +330,51 @@ class GenerateCommandTest extends TestCase
         ]);
 
         $this->assertEquals(0, $command->run($input, $this->createMock(OutputInterface::class)));
+    }
+
+    #[DataProvider('getInvalidClassNames')]
+    public function testExecuteWithInvalidClassName(string $className): void
+    {
+        $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
+        $integrationTestGenerator->expects($this->never())->method('generateTestPerClass');
+
+        $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $componentRegistrar->method('getPath')->willReturn(__DIR__);
+
+        $command = new GenerateCommand(
+            $integrationTestGenerator,
+            $this->createMock(UnitTestGenerator::class),
+            $componentRegistrar,
+            $this->createMock(AppState::class)
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getArgument')->willReturnMap([
+            ['moduleName', 'Vendor_Module'],
+            ['className', $className]
+        ]);
+        $input->method('getOption')->willReturnMap([
+            ['type', 'integration'],
+            ['override-existing', false],
+        ]);
+
+        $output = $this->createMock(OutputInterface::class);
+        $output->expects($this->once())
+            ->method('writeln')
+            ->with('<error>Class name is not a valid class of module Vendor_Module</error>');
+
+        $this->assertEquals(2, $command->run($input, $output));
+    }
+
+    public static function getInvalidClassNames(): array
+    {
+        return [
+            'no namespace' => ['SomeClass'],
+            'path traversal' => ['Vendor\\..\\..\\etc\\passwd'],
+            'slashes' => ['Vendor/Module/Foo'],
+            'trailing separator' => ['Vendor\\Module\\'],
+            'unknown class' => ['Vendor\\Module\\DoesNotExist'],
+            'class outside module' => [TestCase::class],
+        ];
     }
 }
