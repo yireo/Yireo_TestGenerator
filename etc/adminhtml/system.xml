@@ -4,19 +4,19 @@
         <tab id="yireo" sortOrder="999" translate="label">
             <label>Yireo</label>
         </tab>
-        <section id="yireo_test_generator" translate="label" sortOrder="342" showInDefault="1" showInWebsite="1" showInStore="1">
+        <section id="yireo_test_generator" translate="label" sortOrder="342" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Yireo TestGenerator</label>
             <tab>yireo</tab>
             <resource>Yireo_TestGenerator::config</resource>
-            <group id="general" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="general" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>General Settings</label>
                 <field id="openai_enabled"
                        translate="label"
                        type="select"
                        sortOrder="1"
                        showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                       showInWebsite="0"
+                       showInStore="0">
                     <label>Enable OpenAI API</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
@@ -25,9 +25,10 @@
                        type="password"
                        sortOrder="1"
                        showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                       showInWebsite="0"
+                       showInStore="0">
                     <label>OpenAI API key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <depends>
                         <field id="openai_enabled">1</field>
                     </depends>
@@ -38,8 +39,8 @@
                        type="select"
                        sortOrder="1"
                        showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                       showInWebsite="0"
+                       showInStore="0">
                     <label>Enable Anthropic API</label>
                     <comment>Same as Claude AI</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -49,9 +50,10 @@
                        type="password"
                        sortOrder="1"
                        showInDefault="1"
-                       showInWebsite="1"
-                       showInStore="1">
+                       showInWebsite="0"
+                       showInStore="0">
                     <label>Anthropic API key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <depends>
                         <field id="anthropic_enabled">1</field>
                     </depends>

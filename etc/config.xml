@@ -4,9 +4,9 @@
         <yireo_test_generator>
             <general>
                 <openai_enabled>0</openai_enabled>
-                <openai_api_key/>
+                <openai_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
                 <anthropic_enabled>0</anthropic_enabled>
-                <anthropic_api_key/>
+                <anthropic_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
             </general>
         </yireo_test_generator>
     </default>
