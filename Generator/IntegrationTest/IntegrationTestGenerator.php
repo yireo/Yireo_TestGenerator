@@ -67,6 +67,15 @@ class IntegrationTestGenerator
             return;
         }
 
+        if ($moduleContext->getWriter()->isExist($testFile)) {
+            $testContents = (string)$moduleContext->getWriter()->readFile($testFile);
+            if (str_contains($testContents, '@test-generator-skip-override')) {
+                $output->writeln('Skipping override for '.$className);
+
+                return;
+            }
+        }
+
         $testGenerator = $this->sourceTestGeneratorListing->selectGenerator($classStub);
         $phpGenerator = $testGenerator->generate($classStub, $testClassStub);
         $testContents = $phpGenerator->output();

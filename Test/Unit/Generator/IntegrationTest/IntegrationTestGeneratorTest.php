@@ -76,4 +76,43 @@ class IntegrationTestGeneratorTest extends TestCase
 
         $generator->generateTestPerClass('Vendor_Module', __CLASS__, $output, false);
     }
+
+    public function testGenerateTestPerClassSkipsTestWithSkipMarker(): void
+    {
+        $testClassStub = $this->createMock(ClassStub::class);
+        $testClassStub->method('getRelativePath')->willReturn('Test/Integration/FooTest.php');
+
+        $classStubFactory = $this->createMock(ClassStubFactory::class);
+        $classStubFactory->method('create')->willReturn($this->createMock(ClassStub::class));
+        $classStubFactory->method('createTest')->willReturn($testClassStub);
+
+        $writer = $this->createMock(\Magento\Framework\Filesystem\Directory\WriteInterface::class);
+        $writer->method('isExist')->with('/module/Test/Integration/FooTest.php')->willReturn(true);
+        $writer->method('readFile')->willReturn('<?php // @test-generator-skip-override');
+        $writer->expects($this->never())->method('writeFile');
+
+        $moduleContext = $this->createMock(ModuleContext::class);
+        $moduleContext->method('getModuleName')->willReturn('Vendor_Module');
+        $moduleContext->method('getPath')->willReturn('/module');
+        $moduleContext->method('getWriter')->willReturn($writer);
+
+        $moduleContextFactory = $this->createMock(ModuleContextFactory::class);
+        $moduleContextFactory->method('create')->willReturn($moduleContext);
+
+        $sourceTestGeneratorListing = $this->createMock(SourceTestGeneratorListing::class);
+        $sourceTestGeneratorListing->expects($this->never())->method('selectGenerator');
+
+        $output = $this->createMock(OutputInterface::class);
+        $output->expects($this->once())->method('writeln')->with('Skipping override for Vendor\\Module\\Foo');
+
+        $generator = new IntegrationTestGenerator(
+            $this->createMock(ClassCollector::class),
+            $classStubFactory,
+            $moduleContextFactory,
+            $sourceTestGeneratorListing,
+            $this->createMock(AdditionalTestGeneratorListing::class)
+        );
+
+        $generator->generateTestPerClass('Vendor_Module', 'Vendor\\Module\\Foo', $output, true);
+    }
 }

@@ -23,15 +23,17 @@ class ModuleTestGenerator extends AbstractAdditionalTestGenerator
 
     public function apply(ModuleContext $moduleContext, bool $overrideExisting): bool
     {
-        if ($overrideExisting) {
+        $writer = $moduleContext->getWriter();
+        $testFile = $this->getTestFile($moduleContext);
+        if (false === $writer->isExist($testFile)) {
             return true;
         }
 
-        if (false === $moduleContext->getWriter()->isExist($this->getTestFile($moduleContext))) {
-            return true;
+        if (false === $overrideExisting) {
+            return false;
         }
 
-        return false;
+        return false === str_contains((string)$writer->readFile($testFile), '@test-generator-skip-override');
     }
 
     public function generate(ModuleContext $moduleContext, OutputInterface $output): bool

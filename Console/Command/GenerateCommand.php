@@ -62,9 +62,13 @@ class GenerateCommand extends Command
             return Command::INVALID;
         }
 
-        $overrideExisting = (bool)$input->getOption('override-existing');
-        $generateSourceTests = (bool)$input->getOption('generate-source-tests');
-        $generateAdditionalTests = (bool)$input->getOption('generate-additional-tests');
+        $overrideExisting = $this->getBooleanOption($input, 'override-existing');
+        $generateSourceTests = $this->getBooleanOption($input, 'generate-source-tests');
+        $generateAdditionalTests = $this->getBooleanOption($input, 'generate-additional-tests');
+        if (null === $overrideExisting || null === $generateSourceTests || null === $generateAdditionalTests) {
+            $output->writeln('<error>Invalid boolean value for an option</error>');
+            return Command::INVALID;
+        }
 
         $type = (string)$input->getOption('type');
         if (false === in_array($type, ['unit', 'integration'])) {
@@ -102,5 +106,19 @@ class GenerateCommand extends Command
         }
 
         return Command::SUCCESS;
+    }
+
+    private function getBooleanOption(InputInterface $input, string $name): ?bool
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return true;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
     }
 }

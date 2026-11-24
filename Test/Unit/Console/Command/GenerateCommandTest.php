@@ -266,4 +266,68 @@ class GenerateCommandTest extends TestCase
         $result = $command->run($input, $output);
         $this->assertEquals(0, $result);
     }
+
+    public function testExecuteWithInvalidBooleanOption(): void
+    {
+        $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
+        $integrationTestGenerator->expects($this->never())->method('generateSourceTests');
+
+        $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $componentRegistrar->method('getPath')->willReturn(__DIR__);
+
+        $command = new GenerateCommand(
+            $integrationTestGenerator,
+            $this->createMock(UnitTestGenerator::class),
+            $componentRegistrar,
+            $this->createMock(AppState::class)
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getArgument')->willReturnMap([
+            ['moduleName', 'Vendor_Module'],
+            ['className', '']
+        ]);
+        $input->method('getOption')->willReturnMap([
+            ['type', 'integration'],
+            ['override-existing', 'maybe'],
+        ]);
+
+        $output = $this->createMock(OutputInterface::class);
+        $output->expects($this->once())->method('writeln')->with('<error>Invalid boolean value for an option</error>');
+
+        $this->assertEquals(2, $command->run($input, $output));
+    }
+
+    public function testExecuteParsesBooleanOptions(): void
+    {
+        $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
+        $integrationTestGenerator->expects($this->never())->method('generateSourceTests');
+        $integrationTestGenerator->expects($this->once())
+            ->method('generateAdditionalTests')
+            ->with('Vendor_Module', $this->isInstanceOf(OutputInterface::class), true);
+
+        $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $componentRegistrar->method('getPath')->willReturn(__DIR__);
+
+        $command = new GenerateCommand(
+            $integrationTestGenerator,
+            $this->createMock(UnitTestGenerator::class),
+            $componentRegistrar,
+            $this->createMock(AppState::class)
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getArgument')->willReturnMap([
+            ['moduleName', 'Vendor_Module'],
+            ['className', '']
+        ]);
+        $input->method('getOption')->willReturnMap([
+            ['type', 'integration'],
+            ['override-existing', null],
+            ['generate-source-tests', 'false'],
+            ['generate-additional-tests', 'yes'],
+        ]);
+
+        $this->assertEquals(0, $command->run($input, $this->createMock(OutputInterface::class)));
+    }
 }

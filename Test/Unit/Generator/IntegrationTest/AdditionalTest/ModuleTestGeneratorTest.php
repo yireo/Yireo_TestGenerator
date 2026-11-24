@@ -29,10 +29,28 @@ class ModuleTestGeneratorTest extends TestCase
 
     public function testApplyWithOverrideExisting(): void
     {
+        $writer = $this->createMock(WriteInterface::class);
+        $writer->method('isExist')->willReturn(true);
+        $writer->method('readFile')->willReturn('<?php class ModuleTest {}');
+
         $moduleContext = $this->createMock(ModuleContext::class);
-        $moduleContext->expects($this->never())->method('getWriter');
+        $moduleContext->method('getWriter')->willReturn($writer);
+        $moduleContext->method('getTestPath')->willReturn('/tmp/module/Test/Integration/');
 
         $this->assertTrue($this->getGenerator()->apply($moduleContext, true));
+    }
+
+    public function testApplyWithOverrideExistingAndSkipMarker(): void
+    {
+        $writer = $this->createMock(WriteInterface::class);
+        $writer->method('isExist')->willReturn(true);
+        $writer->method('readFile')->willReturn('<?php // @test-generator-skip-override');
+
+        $moduleContext = $this->createMock(ModuleContext::class);
+        $moduleContext->method('getWriter')->willReturn($writer);
+        $moduleContext->method('getTestPath')->willReturn('/tmp/module/Test/Integration/');
+
+        $this->assertFalse($this->getGenerator()->apply($moduleContext, true));
     }
 
     public function testApplyWithNonExistingTest(): void
