@@ -12,9 +12,11 @@
 
 ### Installation
 ```bash
-composer require yireo/magento2-test-generator
+composer require --dev yireo/magento2-test-generator
 bin/magento module:enable Yireo_TestGenerator
 ```
+
+This module writes PHP files into module folders. Only install it as a development dependency and do not deploy it to production. In production mode, the command refuses to run unless you add the `--force` flag.
 
 ### Usage
 Generate integration tests for the module `Yireo_Example` if they don't exist yet:
@@ -24,7 +26,7 @@ bin/magento yireo:test:generate Yireo_Example
 
 Or generate integration tests, overriding existing tests as well (DANGEROUS) unless there is a token `@test-generator-skip-override` found in the test file contents:
 ```bash
-bin/magento yireo:test:generate Yireo_Example --override-existing=1
+bin/magento yireo:test:generate Yireo_Example --override-existing
 ```
 
 Or generate unit tests:
@@ -34,7 +36,7 @@ bin/magento yireo:test:generate Yireo_Example --type=unit
 
 Generate unit tests, overriding the original test, for a specific class only:
 ````bash
-bin/magento yireo:test:generate --override-existing 1 --type unit -- 'LokiCheckout_AccountType' '\Loki\CheckoutAccountType\Config\Source\AccountTypeOptions'
+bin/magento yireo:test:generate --override-existing --type unit -- 'LokiCheckout_AccountType' '\Loki\CheckoutAccountType\Config\Source\AccountTypeOptions'
 ````
 
 ### AI generated tests
@@ -47,7 +49,14 @@ The following coding AIs are currently supported:
 
 Both require an API key to be used. Note that these AI platforms will bill you according to your usage. 
 
-In the Store Configuration under **Yireo > Test Generator** you can enable each AI and configure an API key.
+In the Store Configuration under **Yireo > Test Generator** you can enable each AI and configure an API key. The API keys are stored encrypted.
+
+AI generators are only used when you add the `--ai` flag. This sends the full source code of each class to the AI provider, so make sure that this is allowed for the code you are working on:
+```bash
+bin/magento yireo:test:generate Yireo_Example --type=unit --ai
+```
+
+AI responses are only written to disk when they contain valid PHP code that defines the expected test class.
 
 ### Extending test types
 The Integration Tests can be created by using a custom generator. For instance, there is a `ConfigTestGenerator` which allows for a

@@ -377,4 +377,88 @@ class GenerateCommandTest extends TestCase
             'class outside module' => [TestCase::class],
         ];
     }
+
+    public function testExecuteInProductionModeWithoutForce(): void
+    {
+        $appState = $this->createMock(AppState::class);
+        $appState->method('getMode')->willReturn(AppState::MODE_PRODUCTION);
+        $appState->expects($this->never())->method('setAreaCode');
+
+        $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
+        $integrationTestGenerator->expects($this->never())->method('generateSourceTests');
+
+        $command = new GenerateCommand(
+            $integrationTestGenerator,
+            $this->createMock(UnitTestGenerator::class),
+            $this->createMock(ComponentRegistrar::class),
+            $appState
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getOption')->willReturnMap([['force', false]]);
+
+        $output = $this->createMock(OutputInterface::class);
+        $output->expects($this->once())
+            ->method('writeln')
+            ->with('<error>Generating tests is not allowed in production mode, use --force to override</error>');
+
+        $this->assertEquals(2, $command->run($input, $output));
+    }
+
+    public function testExecuteInProductionModeWithForceAndAreaAlreadySet(): void
+    {
+        $appState = $this->createMock(AppState::class);
+        $appState->method('getMode')->willReturn(AppState::MODE_PRODUCTION);
+        $appState->method('getAreaCode')->willReturn('adminhtml');
+        $appState->expects($this->never())->method('setAreaCode');
+
+        $integrationTestGenerator = $this->createMock(IntegrationTestGenerator::class);
+        $integrationTestGenerator->expects($this->once())->method('generateSourceTests');
+
+        $componentRegistrar = $this->createMock(ComponentRegistrar::class);
+        $componentRegistrar->method('getPath')->willReturn(__DIR__);
+
+        $command = new GenerateCommand(
+            $integrationTestGenerator,
+            $this->createMock(UnitTestGenerator::class),
+            $componentRegistrar,
+            $appState
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getArgument')->willReturnMap([
+            ['moduleName', 'Vendor_Module'],
+            ['className', '']
+        ]);
+        $input->method('getOption')->willReturnMap([
+            ['force', true],
+            ['type', 'integration'],
+            ['override-existing', false],
+            ['generate-source-tests', '1'],
+            ['generate-additional-tests', '0'],
+        ]);
+
+        $this->assertEquals(0, $command->run($input, $this->createMock(OutputInterface::class)));
+    }
+
+    public function testExecuteSetsAreaCodeWhenMissing(): void
+    {
+        $appState = $this->createMock(AppState::class);
+        $appState->method('getAreaCode')->willThrowException(
+            new \Magento\Framework\Exception\LocalizedException(__('Area code is not set'))
+        );
+        $appState->expects($this->once())->method('setAreaCode')->with('frontend');
+
+        $command = new GenerateCommand(
+            $this->createMock(IntegrationTestGenerator::class),
+            $this->createMock(UnitTestGenerator::class),
+            $this->createMock(ComponentRegistrar::class),
+            $appState
+        );
+
+        $input = $this->createMock(InputInterface::class);
+        $input->method('getArgument')->with('moduleName')->willReturn('');
+
+        $this->assertEquals(2, $command->run($input, $this->createMock(OutputInterface::class)));
+    }
 }

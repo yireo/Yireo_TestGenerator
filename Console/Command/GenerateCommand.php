@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Console\Command;
 
 use Magento\Framework\App\State as AppState;
 use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Exception\LocalizedException;
 use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -39,6 +40,7 @@ class GenerateCommand extends Command
             ->addOption('generate-source-tests', null, InputOption::VALUE_OPTIONAL, 'Generate source tests', '1')
             ->addOption('generate-additional-tests', null, InputOption::VALUE_OPTIONAL, 'Generate additional tests', '1')
             ->addOption('ai', null, InputOption::VALUE_NONE, 'Allow sending source code to the configured AI provider')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Allow running in production mode')
         ;
     }
 
@@ -49,7 +51,16 @@ class GenerateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->appState->setAreaCode('frontend');
+        if ($this->appState->getMode() === AppState::MODE_PRODUCTION && false === (bool)$input->getOption('force')) {
+            $output->writeln('<error>Generating tests is not allowed in production mode, use --force to override</error>');
+            return Command::INVALID;
+        }
+
+        try {
+            $this->appState->getAreaCode();
+        } catch (LocalizedException) {
+            $this->appState->setAreaCode('frontend');
+        }
 
         $moduleName = (string)$input->getArgument('moduleName');
         if (empty($moduleName)) {
