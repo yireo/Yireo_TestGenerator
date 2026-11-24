@@ -79,7 +79,7 @@ class OpenAiTestGeneratorTest extends TestCase
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
         $clientWrapper->method('chat')
-            ->with($this->isString(), $this->isString(), 'test-model')
+            ->with($this->anything(), $this->anything(), 'test-model')
             ->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
 
         $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
