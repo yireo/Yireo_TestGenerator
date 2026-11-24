@@ -3,6 +3,7 @@
 namespace Yireo\TestGenerator\Generator\UnitTest;
 
 use Magento\Framework\ObjectManagerInterface;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AiSourceTestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\SourceTestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\GenericSourceTestGenerator;
 use Yireo\TestGenerator\Model\ClassStub;
@@ -16,10 +17,14 @@ class SourceTestGeneratorListing
     ) {
     }
 
-    public function selectGenerator(ClassStub $classStub): SourceTestGeneratorInterface
+    public function selectGenerator(ClassStub $classStub, bool $allowAi = false): SourceTestGeneratorInterface
     {
         foreach ($this->getGenerators() as $testGenerator) {
             if (false === $testGenerator instanceof SourceTestGeneratorInterface) {
+                continue;
+            }
+
+            if (false === $allowAi && $testGenerator instanceof AiSourceTestGeneratorInterface) {
                 continue;
             }
 

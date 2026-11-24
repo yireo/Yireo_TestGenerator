@@ -200,7 +200,8 @@ class GenerateCommandTest extends TestCase
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $unitTestGenerator->expects($this->once())
             ->method('generateTestPerClass')
-            ->with('Vendor_Module', 'SomeClass', $this->isInstanceOf(OutputInterface::class), true);
+            ->with('Vendor_Module', 'SomeClass', $this->isInstanceOf(OutputInterface::class), true, false);
+        $unitTestGenerator->expects($this->never())->method('generateAll');
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
@@ -236,7 +237,7 @@ class GenerateCommandTest extends TestCase
         $unitTestGenerator = $this->createMock(UnitTestGenerator::class);
         $unitTestGenerator->expects($this->once())
             ->method('generateAll')
-            ->with('Vendor_Module', $this->isInstanceOf(OutputInterface::class), true);
+            ->with('Vendor_Module', $this->isInstanceOf(OutputInterface::class), true, true);
 
         $componentRegistrar = $this->createMock(ComponentRegistrar::class);
         $componentRegistrar->method('getPath')->willReturn(__DIR__);
@@ -256,7 +257,8 @@ class GenerateCommandTest extends TestCase
         ]);
         $input->method('getOption')->willReturnMap([
             ['type', 'unit'],
-            ['override-existing', true]
+            ['override-existing', true],
+            ['ai', true],
         ]);
 
         $output = $this->createMock(OutputInterface::class);

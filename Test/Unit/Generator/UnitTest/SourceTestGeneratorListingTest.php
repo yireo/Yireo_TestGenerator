@@ -4,6 +4,7 @@ namespace Yireo\TestGenerator\Test\Unit\Generator\UnitTest;
 
 use Magento\Framework\ObjectManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Yireo\TestGenerator\Generator\UnitTest\SourceTest\AiSourceTestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\GenericSourceTestGenerator;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTest\SourceTestGeneratorInterface;
 use Yireo\TestGenerator\Generator\UnitTest\SourceTestGeneratorListing;
@@ -168,5 +169,47 @@ class SourceTestGeneratorListingTest extends TestCase
 
         $result = $listing->getGenerators();
         $this->assertEmpty($result);
+    }
+
+    public function testSelectGeneratorSkipsAiGeneratorByDefault(): void
+    {
+        $classStub = $this->createMock(ClassStub::class);
+
+        $aiGenerator = $this->createMock(AiSourceTestGeneratorInterface::class);
+        $aiGenerator->expects($this->never())->method('apply');
+
+        $genericGenerator = $this->createMock(GenericSourceTestGenerator::class);
+
+        $listing = $this->getListingWithGenerator($aiGenerator, $genericGenerator);
+
+        $this->assertSame($genericGenerator, $listing->selectGenerator($classStub));
+    }
+
+    public function testSelectGeneratorUsesAiGeneratorWhenAllowed(): void
+    {
+        $classStub = $this->createMock(ClassStub::class);
+
+        $aiGenerator = $this->createMock(AiSourceTestGeneratorInterface::class);
+        $aiGenerator->expects($this->once())->method('apply')->with($classStub)->willReturn(true);
+
+        $genericGenerator = $this->createMock(GenericSourceTestGenerator::class);
+
+        $listing = $this->getListingWithGenerator($aiGenerator, $genericGenerator);
+
+        $this->assertSame($aiGenerator, $listing->selectGenerator($classStub, true));
+    }
+
+    private function getListingWithGenerator(
+        object $generator,
+        GenericSourceTestGenerator $genericGenerator
+    ): SourceTestGeneratorListing {
+        $objectManager = $this->createMock(ObjectManagerInterface::class);
+        $objectManager->method('get')->willReturn($generator);
+
+        return new SourceTestGeneratorListing(
+            $objectManager,
+            $genericGenerator,
+            [['class_name' => 'AiGenerator', 'sort_order' => 10]]
+        );
     }
 }

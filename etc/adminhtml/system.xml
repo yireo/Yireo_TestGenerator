@@ -18,6 +18,7 @@
                        showInWebsite="0"
                        showInStore="0">
                     <label>Enable OpenAI API</label>
+                    <comment>When running yireo:test:generate with --ai, the source code of each class is sent to OpenAI</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="openai_api_key"
@@ -42,7 +43,7 @@
                        showInWebsite="0"
                        showInStore="0">
                     <label>Enable Anthropic API</label>
-                    <comment>Same as Claude AI</comment>
+                    <comment>Same as Claude AI. When running yireo:test:generate with --ai, the source code of each class is sent to Anthropic</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
                 <field id="anthropic_api_key"

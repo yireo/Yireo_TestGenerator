@@ -37,6 +37,7 @@ class GenerateCommand extends Command
             ->addOption('type', null, InputOption::VALUE_OPTIONAL, 'Type of tests (unit, integration)', 'integration')
             ->addOption('generate-source-tests', null, InputOption::VALUE_OPTIONAL, 'Generate source tests', '1')
             ->addOption('generate-additional-tests', null, InputOption::VALUE_OPTIONAL, 'Generate additional tests', '1')
+            ->addOption('ai', null, InputOption::VALUE_NONE, 'Allow sending source code to the configured AI provider')
         ;
     }
 
@@ -72,6 +73,7 @@ class GenerateCommand extends Command
         }
 
         $className = (string)$input->getArgument('className');
+        $allowAi = (bool)$input->getOption('ai');
 
         if ($type === 'integration' && !empty($className)) {
             $this->integrationTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
@@ -86,11 +88,17 @@ class GenerateCommand extends Command
         }
 
         if ($type === 'unit' && !empty($className)) {
-            $this->unitTestGenerator->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
+            $this->unitTestGenerator->generateTestPerClass(
+                $moduleName,
+                $className,
+                $output,
+                $overrideExisting,
+                $allowAi
+            );
         }
 
-        if ($type === 'unit') {
-            $this->unitTestGenerator->generateAll($moduleName, $output, $overrideExisting);
+        if ($type === 'unit' && empty($className)) {
+            $this->unitTestGenerator->generateAll($moduleName, $output, $overrideExisting, $allowAi);
         }
 
         return Command::SUCCESS;

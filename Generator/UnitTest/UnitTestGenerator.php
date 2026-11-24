@@ -23,12 +23,13 @@ class UnitTestGenerator
     public function generateAll(
         string $moduleName,
         OutputInterface $output,
-        bool $overrideExisting
+        bool $overrideExisting,
+        bool $allowAi = false
     ) {
         $moduleContext = $this->getModuleContext($moduleName);
         $classNames = $this->classCollector->collect($moduleContext->getPath());
         foreach ($classNames as $className) {
-            $this->generateTestPerClass($moduleName, $className, $output, $overrideExisting);
+            $this->generateTestPerClass($moduleName, $className, $output, $overrideExisting, $allowAi);
         }
     }
 
@@ -36,7 +37,8 @@ class UnitTestGenerator
         string $moduleName,
         string $className,
         OutputInterface $output,
-        bool $overrideExisting
+        bool $overrideExisting,
+        bool $allowAi = false
     ) {
         $moduleContext = $this->getModuleContext($moduleName);
 
@@ -63,7 +65,7 @@ class UnitTestGenerator
             }
         }
 
-        $testGenerator = $this->generatorListing->selectGenerator($classStub);
+        $testGenerator = $this->generatorListing->selectGenerator($classStub, $allowAi);
         try {
             $testContents = $testGenerator->generate($classStub, $testClassStub);
         } catch (RuntimeException $exception) {
