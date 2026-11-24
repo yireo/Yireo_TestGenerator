@@ -70,6 +70,7 @@ class OpenAiTestGeneratorTest extends TestCase
     public function testGenerate(): void
     {
         $config = $this->createMock(Config::class);
+        $config->method('getOpenAiModel')->willReturn('test-model');
 
         $classStub = $this->createMock(ClassStub::class);
 
@@ -77,7 +78,9 @@ class OpenAiTestGeneratorTest extends TestCase
         $testClassStub->method('getFullQualifiedClassName')->willReturn('Vendor\\Module\\Test\\Unit\\FooTest');
 
         $clientWrapper = $this->createMock(OpenAiClientWrapper::class);
-        $clientWrapper->method('chat')->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
+        $clientWrapper->method('chat')
+            ->with($this->isString(), $this->isString(), 'test-model')
+            ->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
 
         $generator = new OpenAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $result = $generator->generate($classStub, $testClassStub);

@@ -35,6 +35,19 @@
                     </depends>
                 </field>
 
+                <field id="openai_model"
+                       translate="label"
+                       type="text"
+                       sortOrder="1"
+                       showInDefault="1"
+                       showInWebsite="0"
+                       showInStore="0">
+                    <label>OpenAI model</label>
+                    <depends>
+                        <field id="openai_enabled">1</field>
+                    </depends>
+                </field>
+
                 <field id="anthropic_enabled"
                        translate="label"
                        type="select"
@@ -55,6 +68,19 @@
                        showInStore="0">
                     <label>Anthropic API key</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="anthropic_enabled">1</field>
+                    </depends>
+                </field>
+
+                <field id="anthropic_model"
+                       translate="label"
+                       type="text"
+                       sortOrder="1"
+                       showInDefault="1"
+                       showInWebsite="0"
+                       showInStore="0">
+                    <label>Anthropic model</label>
                     <depends>
                         <field id="anthropic_enabled">1</field>
                     </depends>

@@ -5,8 +5,10 @@
             <general>
                 <openai_enabled>0</openai_enabled>
                 <openai_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <openai_model>gpt-4o</openai_model>
                 <anthropic_enabled>0</anthropic_enabled>
                 <anthropic_api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <anthropic_model>claude-sonnet-4-5</anthropic_model>
             </general>
         </yireo_test_generator>
     </default>

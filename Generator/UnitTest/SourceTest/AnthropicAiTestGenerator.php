@@ -38,7 +38,7 @@ class AnthropicAiTestGenerator implements AiSourceTestGeneratorInterface
             $classContents,
         );
 
-        $contents = $this->clientWrapper->chat($prompt, $anthropicAiApiKey);
+        $contents = $this->clientWrapper->chat($prompt, $anthropicAiApiKey, $this->config->getAnthropicModel());
 
         return $this->aiOutputValidator->validate($contents, $testClassStub->getFullQualifiedClassName());
     }

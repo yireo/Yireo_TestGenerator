@@ -2,24 +2,45 @@
 
 namespace Yireo\TestGenerator\Utilities;
 
+use GuzzleHttp\Client as HttpClient;
 use OpenAI;
+use RuntimeException;
+use Throwable;
 
 class OpenAiClientWrapper
 {
-    public function chat(string $prompt, string $apiKey): string
+    private const TIMEOUT = 120;
+    private const CONNECT_TIMEOUT = 10;
+
+    public function chat(string $prompt, string $apiKey, string $model): string
     {
-        $client = OpenAI::client($apiKey);
+        $client = OpenAI::factory()
+            ->withApiKey($apiKey)
+            ->withHttpClient(new HttpClient([
+                'timeout' => self::TIMEOUT,
+                'connect_timeout' => self::CONNECT_TIMEOUT,
+            ]))
+            ->make();
 
-        $result = $client->chat()->create([
-            'model' => 'gpt-4o',
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => $prompt
+        try {
+            $result = $client->chat()->create([
+                'model' => $model,
+                'messages' => [
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ],
                 ],
-            ],
-        ]);
+            ]);
+        } catch (Throwable $exception) {
+            throw new RuntimeException('OpenAI request failed: '.$exception->getMessage(), 0, $exception);
+        }
 
-        return $result->choices[0]->message->content;
+        $content = (string)($result->choices[0]->message->content ?? '');
+        if ($content === '') {
+            throw new RuntimeException('OpenAI returned an empty response');
+        }
+
+        return $content;
     }
 }

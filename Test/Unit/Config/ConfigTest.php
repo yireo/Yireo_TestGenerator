@@ -75,6 +75,16 @@ class ConfigTest extends TestCase
         $this->assertEquals('', $config->getAnthropicApiKey());
     }
 
+    public function testGetModels(): void
+    {
+        $config = new Config($this->createScopeConfigMock('yireo_test_generator/general/openai_model', 'gpt-4o'));
+        $this->assertSame('gpt-4o', $config->getOpenAiModel());
+
+        $path = 'yireo_test_generator/general/anthropic_model';
+        $config = new Config($this->createScopeConfigMock($path, 'claude-sonnet-4-5'));
+        $this->assertSame('claude-sonnet-4-5', $config->getAnthropicModel());
+    }
+
     /**
      * Create a mock of ScopeConfigInterface
      *

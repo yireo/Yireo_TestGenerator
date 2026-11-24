@@ -38,7 +38,7 @@ class OpenAiTestGenerator implements AiSourceTestGeneratorInterface
             $classContents,
         );
 
-        $contents = $this->clientWrapper->chat($prompt, $openAiApiKey);
+        $contents = $this->clientWrapper->chat($prompt, $openAiApiKey, $this->config->getOpenAiModel());
 
         return $this->aiOutputValidator->validate($contents, $testClassStub->getFullQualifiedClassName());
     }

@@ -69,13 +69,16 @@ class AnthropicAiTestGeneratorTest extends TestCase
     public function testGenerate(): void
     {
         $config = $this->createMock(Config::class);
+        $config->method('getAnthropicModel')->willReturn('test-model');
 
         $classStub = $this->createMock(ClassStub::class);
         $testClassStub = $this->createMock(ClassStub::class);
         $testClassStub->method('getFullQualifiedClassName')->willReturn('Vendor\\Module\\Test\\Unit\\FooTest');
 
         $clientWrapper = $this->createMock(AnthropicClientWrapper::class);
-        $clientWrapper->method('chat')->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
+        $clientWrapper->method('chat')
+            ->with($this->isString(), $this->isString(), 'test-model')
+            ->willReturn("Sure:\n```php\n<?php\nnamespace Vendor\\Module\\Test\\Unit;\n\nfinal class FooTest {}\n```\nDone.");
 
         $generator = new AnthropicAiTestGenerator($config, $clientWrapper, new AiOutputValidator());
         $output = $generator->generate($classStub, $testClassStub);
