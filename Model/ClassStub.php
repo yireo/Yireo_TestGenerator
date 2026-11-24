@@ -3,7 +3,6 @@
 namespace Yireo\TestGenerator\Model;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Filesystem;
 use ReflectionClass;
@@ -72,11 +71,6 @@ class ClassStub
     public function getClassMethods(): array
     {
         return $this->getReflection()->getMethods();
-    }
-
-    public function getInstance()
-    {
-        return ObjectManager::getInstance()->get($this->getFullQualifiedClassName());
     }
 
     public function getReflection(): ReflectionClass
